@@ -1,0 +1,11 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --up: #d92d20;   /* 紅漲 */
+  --down: #12b76a; /* 綠跌 */
+  --bg: #0b0f14;
+  --card: #131a22;
+}
+html, body { background: var(--bg); color: #e6edf3; }
