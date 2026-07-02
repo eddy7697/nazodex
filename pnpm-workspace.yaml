@@ -1,12 +1,6 @@
 allowBuilds:
-  '0': e
-  '1': s
-  '2': b
-  '3': u
-  '4': i
-  '5': l
-  '6': d
-  '@prisma/client': set this to true or false
-  '@prisma/engines': set this to true or false
-  prisma: set this to true or false
-  sharp: set this to true or false
+  '@prisma/client': true
+  '@prisma/engines': true
+  prisma: true
+  sharp: true
+  esbuild: true
