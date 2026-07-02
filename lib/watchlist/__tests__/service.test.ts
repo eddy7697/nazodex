@@ -68,4 +68,12 @@ describe("watchlist service", () => {
     const list = await listWatchlist("u1", p);
     expect(list.map((x) => x.stockSymbol)).toEqual(["2454", "2330"]);
   });
+  it("新增的項目 sortOrder 遞增(附加到最後)", async () => {
+    const p = makeMock();
+    await addToWatchlist("u1", "2330", p);
+    await addToWatchlist("u1", "2454", p);
+    await addToWatchlist("u1", "2412", p);
+    const list = await listWatchlist("u1", p);
+    expect(list.map((x) => x.stockSymbol)).toEqual(["2330", "2454", "2412"]);
+  });
 });

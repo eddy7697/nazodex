@@ -11,9 +11,11 @@ export async function listWatchlist(userId: string, p: P = defaultPrisma) {
 }
 
 export async function addToWatchlist(userId: string, symbol: string, p: P = defaultPrisma) {
+  const existing = await p.watchlistItem.findMany({ where: { userId } });
+  const nextOrder = existing.reduce((max: number, r: any) => Math.max(max, r.sortOrder), -1) + 1;
   await p.watchlistItem.upsert({
     where: { userId_stockSymbol: { userId, stockSymbol: symbol } },
-    create: { id: `${userId}:${symbol}`, userId, stockSymbol: symbol, sortOrder: Date.now() % 1000000 },
+    create: { id: `${userId}:${symbol}`, userId, stockSymbol: symbol, sortOrder: nextOrder },
     update: {},
   });
 }
