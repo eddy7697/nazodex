@@ -50,5 +50,10 @@ COPY --from=builder /app/public ./public
 # Compiled daily-ingest script (see esbuild step above); run by the GKE
 # CronJob via `node dist/ingest-daily.mjs`.
 COPY --from=builder /app/dist ./dist
+# Prisma schema + migrations, so `prisma migrate deploy` can run in-cluster
+# as a Kubernetes initContainer on every deploy (forward-only, non-destructive).
+# The prisma CLI itself ships via node_modules (moved to dependencies so
+# `pnpm prune --prod` above keeps it).
+COPY --from=builder /app/prisma ./prisma
 EXPOSE 3000
 CMD ["node", "server.js"]

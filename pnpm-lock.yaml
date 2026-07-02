@@ -23,6 +23,9 @@ importers:
       next-auth:
         specifier: 5.0.0-beta.31
         version: 5.0.0-beta.31(next@16.2.9(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(react@19.2.7)
+      prisma:
+        specifier: ^6.19.3
+        version: 6.19.3(typescript@6.0.3)
       react:
         specifier: ^19.2.7
         version: 19.2.7
@@ -60,9 +63,6 @@ importers:
       postcss:
         specifier: ^8.5.16
         version: 8.5.16
-      prisma:
-        specifier: ^6.19.3
-        version: 6.19.3(typescript@6.0.3)
       tailwindcss:
         specifier: 3.4.19
         version: 3.4.19(tsx@4.22.4)
