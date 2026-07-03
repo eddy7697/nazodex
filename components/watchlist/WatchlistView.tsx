@@ -31,11 +31,17 @@ export default function WatchlistView() {
   }
 
   const quotes = items.map((i) => i.quote).filter((q): q is Quote => q != null);
+  // 報價最新時戳落後現在 15 分鐘以上 → 顯示的是收盤/延遲資料(盤後或 MIS 失敗回退 DB)
+  const newestAsOf = quotes.reduce((max, q) => Math.max(max, Date.parse(q.asOf) || 0), 0);
+  const isStale = quotes.length > 0 && Date.now() - newestAsOf > 15 * 60_000;
 
   return (
     <div>
       <AddStock onAdded={load} />
-      <div className="mb-2 text-right text-xs text-gray-500">更新於 {updatedAt}</div>
+      <div className="mb-2 text-right text-xs text-gray-500">
+        {isStale && <span className="mr-2 rounded bg-white/5 px-1.5 py-0.5 text-gray-400">收盤資料(非即時)</span>}
+        更新於 {updatedAt}
+      </div>
 
       {/* 手機:卡片 */}
       <div className="space-y-2 md:hidden">
