@@ -36,3 +36,8 @@ export async function getMarketOverview(deps: OverviewDeps = {}): Promise<Market
   ]);
   return { indices: indices ?? [], breadth, institutional, sectors };
 }
+
+// 首頁指數列輕量入口:只取指數,與 getMarketOverview 共享 cachedIndices 快取。
+export async function getIndices(deps: OverviewDeps = {}): Promise<Quote[]> {
+  return (await orNull(deps.indices ?? (() => cachedIndices("indices")))) ?? [];
+}

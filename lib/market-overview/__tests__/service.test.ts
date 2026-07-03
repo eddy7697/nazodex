@@ -31,3 +31,19 @@ describe("getMarketOverview", () => {
     expect(out.sectors).toEqual(sectors);
   });
 });
+
+import { getIndices } from "@/lib/market-overview/service";
+
+describe("getIndices", () => {
+  const q = (symbol: string): any => ({ symbol, name: symbol, price: 1, change: 0, changePct: 0, volume: 0, asOf: "x" });
+
+  it("回傳注入的指數", async () => {
+    const indices = await getIndices({ indices: async () => [q("t00"), q("o00")] });
+    expect(indices.map((i: any) => i.symbol)).toEqual(["t00", "o00"]);
+  });
+
+  it("上游失敗回空陣列", async () => {
+    const indices = await getIndices({ indices: async () => { throw new Error("boom"); } });
+    expect(indices).toEqual([]);
+  });
+});
