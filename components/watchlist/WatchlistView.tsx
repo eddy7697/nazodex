@@ -18,19 +18,19 @@ function DragHandle({ listeners, attributes }: { listeners?: Record<string, unkn
   );
 }
 
-function SortableCard({ quote, onRemove }: { quote: Quote; onRemove: (s: string) => void }) {
+function SortableCard({ quote, closes, onRemove }: { quote: Quote; closes?: number[]; onRemove: (s: string) => void }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: quote.symbol });
   return (
-    <QuoteCard quote={quote} onRemove={onRemove} cardRef={setNodeRef}
+    <QuoteCard quote={quote} closes={closes} onRemove={onRemove} cardRef={setNodeRef}
       style={{ transform: CSS.Transform.toString(transform), transition, opacity: isDragging ? 0.6 : undefined }}
       dragHandle={<DragHandle listeners={listeners} attributes={attributes} />} />
   );
 }
 
-function SortableRow({ quote, onRemove }: { quote: Quote; onRemove: (s: string) => void }) {
+function SortableRow({ quote, closes, onRemove }: { quote: Quote; closes?: number[]; onRemove: (s: string) => void }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: quote.symbol });
   return (
-    <QuoteRow quote={quote} onRemove={onRemove} rowRef={setNodeRef}
+    <QuoteRow quote={quote} closes={closes} onRemove={onRemove} rowRef={setNodeRef}
       style={{ transform: CSS.Transform.toString(transform), transition, opacity: isDragging ? 0.6 : undefined }}
       dragHandle={<DragHandle listeners={listeners} attributes={attributes} />} />
   );
@@ -39,6 +39,7 @@ function SortableRow({ quote, onRemove }: { quote: Quote; onRemove: (s: string) 
 export default function WatchlistView() {
   const [items, setItems] = useState<Item[]>([]);
   const [updatedAt, setUpdatedAt] = useState<string>("");
+  const [sparklines, setSparklines] = useState<Record<string, number[]>>({});
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
 
   const load = useCallback(async () => {
@@ -49,15 +50,27 @@ export default function WatchlistView() {
     setUpdatedAt(new Date().toLocaleTimeString("zh-TW", { hour: "2-digit", minute: "2-digit" }));
   }, []);
 
+  const loadSparklines = useCallback(async () => {
+    const res = await fetch("/api/watchlist/sparklines");
+    if (!res.ok) return; // 失敗:不畫線,其餘照常
+    const json = await res.json();
+    setSparklines(json.sparklines ?? {});
+  }, []);
+
   useEffect(() => {
     load();
     const id = setInterval(load, 60_000); // 每分鐘刷新
     return () => clearInterval(id);
   }, [load]);
 
+  useEffect(() => {
+    loadSparklines(); // 每日資料,mount 抓一次即可
+  }, [loadSparklines]);
+
   async function remove(symbol: string) {
     await fetch(`/api/watchlist/${symbol}`, { method: "DELETE" });
     load();
+    loadSparklines();
   }
 
   async function onDragEnd(e: DragEndEvent) {
@@ -82,7 +95,7 @@ export default function WatchlistView() {
 
   return (
     <div>
-      <AddStock onAdded={load} />
+      <AddStock onAdded={() => { load(); loadSparklines(); }} />
       <div className="mb-2 text-right text-xs text-gray-500">
         {isStale && <span className="mr-2 rounded bg-white/5 px-1.5 py-0.5 text-gray-400">收盤資料(非即時)</span>}
         更新於 {updatedAt}
@@ -92,16 +105,16 @@ export default function WatchlistView() {
         <SortableContext items={quotes.map((q) => q.symbol)} strategy={verticalListSortingStrategy}>
           {/* 手機:卡片 */}
           <div className="space-y-2 md:hidden">
-            {quotes.map((q) => <SortableCard key={q.symbol} quote={q} onRemove={remove} />)}
+            {quotes.map((q) => <SortableCard key={q.symbol} quote={q} closes={sparklines[q.symbol]} onRemove={remove} />)}
           </div>
 
           {/* 電腦:表格 */}
           <table className="hidden w-full md:table">
             <thead className="text-left text-xs text-gray-500">
-              <tr><th>名稱</th><th className="text-right">成交</th><th className="text-right">漲跌幅</th><th className="text-right">量(張)</th><th></th></tr>
+              <tr><th>名稱</th><th>近月</th><th className="text-right">成交</th><th className="text-right">漲跌幅</th><th className="text-right">量(張)</th><th></th></tr>
             </thead>
             <tbody>
-              {quotes.map((q) => <SortableRow key={q.symbol} quote={q} onRemove={remove} />)}
+              {quotes.map((q) => <SortableRow key={q.symbol} quote={q} closes={sparklines[q.symbol]} onRemove={remove} />)}
             </tbody>
           </table>
         </SortableContext>

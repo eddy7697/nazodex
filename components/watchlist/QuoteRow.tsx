@@ -2,15 +2,17 @@
 import Link from "next/link";
 import type { Quote } from "@/lib/quotes/types";
 import { changeColorClass, fmtPrice, fmtSignedPct } from "@/lib/format";
+import Sparkline from "@/components/watchlist/Sparkline";
 
 export default function QuoteRow({
-  quote, onRemove, dragHandle, rowRef, style,
+  quote, onRemove, dragHandle, rowRef, style, closes,
 }: {
   quote: Quote;
   onRemove: (s: string) => void;
   dragHandle?: React.ReactNode;
   rowRef?: React.Ref<HTMLTableRowElement>;
   style?: React.CSSProperties;
+  closes?: number[];
 }) {
   const c = changeColorClass(quote.change);
   return (
@@ -21,6 +23,7 @@ export default function QuoteRow({
           <Link href={`/stock/${quote.symbol}`}>{quote.name}<span className="ml-2 text-xs text-gray-400">{quote.symbol}</span></Link>
         </span>
       </td>
+      <td className="py-2"><Sparkline closes={closes} width={80} /></td>
       <td className={`py-2 text-right font-bold ${c}`}>{fmtPrice(quote.price)}</td>
       <td className={`py-2 text-right ${c}`}>{fmtSignedPct(quote.changePct)}</td>
       <td className="py-2 text-right text-gray-400">{quote.volume.toLocaleString()}</td>

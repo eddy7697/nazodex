@@ -12,4 +12,12 @@ describe("QuoteCard", () => {
     const pct = screen.getByText("+1.40%");
     expect(pct.className).toContain("text-up");
   });
+
+  it("有 closes 時渲染走勢線,沒有則無 svg", () => {
+    const quote = { symbol: "2330", name: "台積電", price: 1085, change: 15, changePct: 1.4, volume: 21000, asOf: "x" };
+    const withLine = render(<QuoteCard quote={quote} onRemove={() => {}} closes={[1000, 1085]} />);
+    expect(withLine.container.querySelector("svg")).toBeTruthy();
+    const without = render(<QuoteCard quote={quote} onRemove={() => {}} />);
+    expect(without.container.querySelector("svg")).toBeNull();
+  });
 });

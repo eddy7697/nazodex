@@ -2,15 +2,17 @@
 import Link from "next/link";
 import type { Quote } from "@/lib/quotes/types";
 import { changeColorClass, fmtPrice, fmtSignedPct } from "@/lib/format";
+import Sparkline from "@/components/watchlist/Sparkline";
 
 export default function QuoteCard({
-  quote, onRemove, dragHandle, cardRef, style,
+  quote, onRemove, dragHandle, cardRef, style, closes,
 }: {
   quote: Quote;
   onRemove: (s: string) => void;
   dragHandle?: React.ReactNode;
   cardRef?: React.Ref<HTMLDivElement>;
   style?: React.CSSProperties;
+  closes?: number[];
 }) {
   const c = changeColorClass(quote.change);
   return (
@@ -20,7 +22,8 @@ export default function QuoteCard({
         <div className="font-bold">{quote.name}</div>
         <div className="text-xs text-gray-400">{quote.symbol}</div>
       </Link>
-      <div className="text-right">
+      <Sparkline closes={closes} />
+      <div className="ml-3 text-right">
         <div className={`text-xl font-bold ${c}`}>{fmtPrice(quote.price)}</div>
         <div className="text-sm">
           <span className={c}>{quote.change > 0 ? "▲" : quote.change < 0 ? "▼" : ""}</span>{" "}
