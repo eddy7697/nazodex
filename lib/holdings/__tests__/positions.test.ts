@@ -18,7 +18,7 @@ describe("computePositions", () => {
     const [p] = computePositions([txn({ side: "BUY", quantity: 1000, price: 600, fee: 855 })]);
     expect(p).toEqual({
       symbol: "2330", shares: 1000, totalCost: 600855,
-      avgCost: 600.855, realizedPnl: 0,
+      avgCost: 600.855, realizedPnl: 0, dividendIncome: 0,
     });
   });
   it("兩筆買進攤平均價", () => {
@@ -118,5 +118,81 @@ describe("computeSummary", () => {
     expect(s.marketValue).toBe(0);
     expect(s.realizedPnl).toBe(10000);
     expect(s.returnPct).toBe(0);
+  });
+});
+
+describe("股利", () => {
+  it("現金股利累計為 dividendIncome(扣匯費/補充費),不動股數與成本", () => {
+    const [p] = computePositions([
+      txn({ side: "BUY", quantity: 1000, price: 100 }),
+      txn({ side: "DIV_CASH", quantity: 1000, price: 2.5, fee: 10, tax: 0, date: new Date("2026-03-01") }),
+    ]);
+    expect(p.shares).toBe(1000);
+    expect(p.totalCost).toBe(100000);
+    expect(p.dividendIncome).toBe(2490);
+    expect(p.realizedPnl).toBe(0);
+  });
+  it("配股增加股數,成本不變 → 均價稀釋", () => {
+    const [p] = computePositions([
+      txn({ side: "BUY", quantity: 1000, price: 100 }),
+      txn({ side: "DIV_STOCK", quantity: 100, price: 0, date: new Date("2026-03-01") }),
+    ]);
+    expect(p.shares).toBe(1100);
+    expect(p.totalCost).toBe(100000);
+    expect(p.avgCost).toBeCloseTo(100000 / 1100, 8);
+  });
+  it("配股後賣出:以稀釋後均價認列已實現", () => {
+    const [p] = computePositions([
+      txn({ side: "BUY", quantity: 1000, price: 110 }),
+      txn({ side: "DIV_STOCK", quantity: 100, price: 0, date: new Date("2026-03-01") }),
+      txn({ side: "SELL", quantity: 1100, price: 120, date: new Date("2026-04-01") }),
+    ]);
+    // avgCost = 110000/1100 = 100;realized = 132000 - 100*1100 = 22000
+    expect(p.shares).toBe(0);
+    expect(p.realizedPnl).toBe(22000);
+  });
+  it("已出清仍保留股利供加總", () => {
+    const [p] = computePositions([
+      txn({ side: "BUY", quantity: 1000, price: 100 }),
+      txn({ side: "SELL", quantity: 1000, price: 100, date: new Date("2026-02-01") }),
+      txn({ side: "DIV_CASH", quantity: 1000, price: 3, date: new Date("2026-03-01") }),
+    ]);
+    expect(p.shares).toBe(0);
+    expect(p.dividendIncome).toBe(3000);
+  });
+});
+
+describe("validateNoOversell 股利", () => {
+  it("DIV_STOCK 計入持股,其後賣出合法", () => {
+    expect(validateNoOversell([
+      txn({ side: "BUY", quantity: 1000, price: 100 }),
+      txn({ side: "DIV_STOCK", quantity: 100, price: 0, date: new Date("2026-02-01") }),
+      txn({ side: "SELL", quantity: 1100, price: 120, date: new Date("2026-03-01") }),
+    ])).toEqual({ ok: true });
+  });
+  it("移除配股後重放應擋下超賣(模擬刪配股單)", () => {
+    expect(validateNoOversell([
+      txn({ side: "BUY", quantity: 1000, price: 100 }),
+      txn({ side: "SELL", quantity: 1100, price: 120, date: new Date("2026-03-01") }),
+    ])).toEqual({ ok: false, symbol: "2330" });
+  });
+  it("DIV_CASH 不影響股數", () => {
+    expect(validateNoOversell([
+      txn({ side: "DIV_CASH", quantity: 1000, price: 2 }),
+    ])).toEqual({ ok: true });
+  });
+});
+
+describe("computeSummary 股利", () => {
+  it("加總各檔股利(含已出清)", () => {
+    const positions = computePositions([
+      txn({ side: "BUY", quantity: 1000, price: 100 }),
+      txn({ side: "DIV_CASH", quantity: 1000, price: 2, date: new Date("2026-03-01") }),
+      txn({ stockSymbol: "2454", side: "BUY", quantity: 1000, price: 50 }),
+      txn({ stockSymbol: "2454", side: "SELL", quantity: 1000, price: 50, date: new Date("2026-02-01") }),
+      txn({ stockSymbol: "2454", side: "DIV_CASH", quantity: 1000, price: 1, date: new Date("2026-03-01") }),
+    ]);
+    const s = computeSummary(positions, new Map([["2330", { price: 100 }]]));
+    expect(s.dividendIncome).toBe(3000);
   });
 });
