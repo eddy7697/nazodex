@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { changeColorClass, fmtPrice, fmtSignedPct, fmtMoney, fmtSignedMoney } from "@/lib/format";
+import { changeColorClass, fmtPrice, fmtSignedPct, fmtMoney, fmtSignedMoney, fmtSignedYi } from "@/lib/format";
 
 describe("format", () => {
   it("漲用紅(up)、跌用綠(down)", () => {
@@ -20,6 +20,14 @@ describe("fmtMoney", () => {
   });
   it("負數", () => {
     expect(fmtMoney(-500.6)).toBe("-501");
+  });
+});
+
+describe("fmtSignedYi", () => {
+  it("元轉億,帶正負號,一位小數", () => {
+    expect(fmtSignedYi(9_955_637_650)).toBe("+99.6");
+    expect(fmtSignedYi(-89_046_513_677)).toBe("-890.5");
+    expect(fmtSignedYi(0)).toBe("0.0");
   });
 });
 
