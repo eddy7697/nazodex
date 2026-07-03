@@ -6,6 +6,7 @@ const tabs = [
   { href: "/", label: "自選" },
   { href: "/market", label: "大盤" },
   { href: "/screener", label: "選股" },
+  { href: "/strategy", label: "策略" },
   { href: "/holdings", label: "持股" },
 ];
 
