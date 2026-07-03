@@ -2,7 +2,16 @@ type Raw = Record<string, string>;
 export type DailyRow = {
   symbol: string; name: string;
   open: number; high: number; low: number; close: number; volume: number;
+  change: number | null;      // 漲跌價差(帶正負);缺值 null
+  date: string | null;        // ISO 資料日期(民國轉換);缺值 null
 };
+
+// 民國 "1150702" → "2026-07-02"
+function rocToIso(d: string | undefined): string | null {
+  const m = d?.match(/^(\d{3})(\d{2})(\d{2})$/);
+  if (!m) return null;
+  return `${Number(m[1]) + 1911}-${m[2]}-${m[3]}`;
+}
 
 function num(s: string | undefined): number | null {
   if (s == null) return null;
@@ -27,6 +36,8 @@ export function parseTwseDaily(json: unknown): DailyRow[] {
       low: num(r.LowestPrice) ?? close,
       close,
       volume: num(r.TradeVolume) ?? 0,
+      change: num(r.Change),
+      date: rocToIso(r.Date),
     });
   }
   return out;
