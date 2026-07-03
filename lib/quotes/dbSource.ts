@@ -30,7 +30,7 @@ export async function getDailyQuotesFromDb(
       price,
       change,
       changePct,
-      volume: Number(latest.volume),
+      volume: Math.floor(Number(latest.volume) / 1000), // DB 存股數,對外統一為張(同 MIS)
       asOf: latest.date.toISOString(),
     });
   }

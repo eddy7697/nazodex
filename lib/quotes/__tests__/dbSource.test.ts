@@ -23,4 +23,12 @@ describe("getDailyQuotesFromDb", () => {
     expect(quotes[0].change).toBe(15);
     expect(quotes[0].changePct).toBeCloseTo(1.4, 1);
   });
+
+  it("volume 由股換算成張(與 MIS 盤中單位一致)", async () => {
+    const rows = [
+      { stockSymbol: "2330", date: new Date("2026-07-01"), close: 1085, volume: 21_500_000n },
+    ];
+    const quotes = await getDailyQuotesFromDb(["2330"], mockPrisma(rows));
+    expect(quotes[0].volume).toBe(21500); // 21,500,000 股 = 21,500 張
+  });
 });

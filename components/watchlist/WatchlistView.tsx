@@ -45,7 +45,7 @@ export default function WatchlistView() {
       {/* 電腦:表格 */}
       <table className="hidden w-full md:table">
         <thead className="text-left text-xs text-gray-500">
-          <tr><th>名稱</th><th className="text-right">成交</th><th className="text-right">漲跌幅</th><th className="text-right">量</th><th></th></tr>
+          <tr><th>名稱</th><th className="text-right">成交</th><th className="text-right">漲跌幅</th><th className="text-right">量(張)</th><th></th></tr>
         </thead>
         <tbody>
           {quotes.map((q) => <QuoteRow key={q.symbol} quote={q} onRemove={remove} />)}
