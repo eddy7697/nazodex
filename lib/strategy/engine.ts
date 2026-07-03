@@ -1,4 +1,4 @@
-import type { FactorKey, FactorRow, FactorScores } from "@/lib/strategy/types";
+import type { FactorKey, FactorRow, FactorScores, Recommendation, StrategyDef, Weights } from "@/lib/strategy/types";
 
 export const UNIVERSE_MIN_LOTS = 200; // 排除殭屍股
 export const UNIVERSE_MIN_CLOSE = 5;  // 排除雞蛋水餃股
@@ -50,3 +50,73 @@ export function computeFactorScores(rows: FactorRow[]): FactorScores[] {
     heat: heatHigh[i],
   }));
 }
+
+export const MIN_FACTORS = 3; // 資料太殘缺的股票不進榜
+
+export function compositeScore(f: FactorScores, weights: Weights): number | null {
+  let num = 0, den = 0, count = 0;
+  for (const k of FACTOR_KEYS) {
+    const v = f[k];
+    if (v == null) continue;
+    num += weights[k] * v;
+    den += weights[k];
+    count++;
+  }
+  if (count < MIN_FACTORS || den <= 0) return null;
+  // Round to 10 decimal places to avoid floating point precision errors
+  return Math.round((num / den) * 1e10) / 1e10;
+}
+
+// ≥90 分講「前 X%」更有力,其餘講「贏過 X%」
+function pctPhrase(score: number): string {
+  if (score >= 90) return `前 ${Math.max(1, Math.round(100 - score))}%`;
+  return `贏過 ${Math.round(score)}% 的股票`;
+}
+
+function reasonText(k: FactorKey, score: number, row: FactorRow): string {
+  switch (k) {
+    case "value": return `估值便宜度${pctPhrase(score)}`;
+    case "dividend": return `殖利率${pctPhrase(score)}`;
+    case "momentum":
+      return row.biasPct != null && row.biasPct > 0
+        ? `站上月均線 +${row.biasPct.toFixed(1)}%,動能${pctPhrase(score)}`
+        : `價格動能${pctPhrase(score)}`;
+    case "chips": return `法人買超力道${pctPhrase(score)}`;
+    case "heat": return `成交熱度${pctPhrase(score)}`;
+  }
+}
+
+// 只描述事實不喊買賣;取分數最高兩因子
+export function buildReasons(f: FactorScores, row: FactorRow): string[] {
+  return FACTOR_KEYS
+    .filter((k) => f[k] != null)
+    .sort((a, b) => f[b]! - f[a]!)
+    .slice(0, 2)
+    .map((k) => reasonText(k, f[k]!, row));
+}
+
+export function recommend(rows: FactorRow[], weights: Weights, topN = 20): Recommendation[] {
+  const universe = rows.filter(inUniverse);
+  const scores = computeFactorScores(universe);
+  const recs: Recommendation[] = [];
+  for (let i = 0; i < universe.length; i++) {
+    const score = compositeScore(scores[i], weights);
+    if (score == null) continue;
+    recs.push({ row: universe[i], score, factors: scores[i], reasons: buildReasons(scores[i], universe[i]) });
+  }
+  recs.sort((a, b) => b.score - a.score || b.row.volumeLots - a.row.volumeLots);
+  return recs.slice(0, topN);
+}
+
+export const STRATEGIES: StrategyDef[] = [
+  { key: "balanced", label: "均衡精選", blurb: "五力平均、體質全面",
+    weights: { value: 0.25, dividend: 0.25, momentum: 0.2, chips: 0.2, heat: 0.1 } },
+  { key: "income", label: "存股收息", blurb: "領股息為主,兼顧不買貴",
+    weights: { value: 0.25, dividend: 0.45, momentum: 0.05, chips: 0.15, heat: 0.1 } },
+  { key: "value", label: "價值獵手", blurb: "便宜是硬道理",
+    weights: { value: 0.5, dividend: 0.2, momentum: 0.05, chips: 0.15, heat: 0.1 } },
+  { key: "momentum", label: "動能突擊", blurb: "順勢而為、量價齊揚",
+    weights: { value: 0.05, dividend: 0.05, momentum: 0.45, chips: 0.25, heat: 0.2 } },
+  { key: "chips", label: "主力同行", blurb: "跟著法人腳步",
+    weights: { value: 0.1, dividend: 0.05, momentum: 0.2, chips: 0.5, heat: 0.15 } },
+];
