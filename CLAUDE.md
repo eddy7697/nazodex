@@ -7,7 +7,7 @@ Taidex（對外網域 **tradex.nazo.com.tw**）——給投資新手（擁有者
 
 ```bash
 pnpm dev            # 本機開發
-pnpm test           # Vitest（91 tests）
+pnpm test           # Vitest（92 tests）
 pnpm build          # Next.js standalone build
 pnpm exec tsc --noEmit
 pnpm exec prisma migrate dev --name <desc>   # 新增 schema 變更時產生 migration
@@ -67,6 +67,7 @@ pnpm ingest:daily   # 手動跑每日行情灌入（需可連 DB）
 「看盤 / 自選股」「持股損益追蹤」「大盤與產業總覽」「條件選股」已上線（全用 TWSE 免費源,未用到 FinMind）。後續（依價值）:
 1. 持股損益延伸:股利/除權息、報表圖表(v1 刻意不做,見 spec 的 YAGNI 節)。
 2. 大盤延伸:上櫃漲跌家數/法人、大盤 K 線、產業下鑽(v1 刻意不做,見 spec 的 YAGNI 節)。
-3. 選股延伸:上櫃股票、技術指標(等 DailyQuote 歷史累積)、產業別篩選、儲存自訂策略、結果一鍵加自選(v1 刻意不做,見 spec 的 YAGNI 節)。
+3. 選股延伸:上櫃股票、技術指標(等 DailyQuote 歷史累積,約 2026-10 起可做均線)、產業別篩選、儲存自訂策略(v1 刻意不做,見 spec 的 YAGNI 節)。
 
-v1 尚未做的 polish（小項）:大盤指數列 + 卡片迷你走勢線、拖曳排序 UI（後端 API 已就緒）、盤後「資料延遲」標示（`Quote.asOf` 已有）、成交量單位統一（張 vs 股）、AddStock debounce。
+v1 尚未做的 polish（小項）:大盤指數列 + 卡片迷你走勢線。
+（已完成:拖曳排序（dnd-kit）、盤後「收盤資料」標示、成交量統一為張、AddStock debounce、選股結果一鍵加自選——2026-07-03）
