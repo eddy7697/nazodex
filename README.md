@@ -1,6 +1,13 @@
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="public/brand/logo-name.webp">
+    <img src="public/brand/logo.webp" width="220" alt="Taidex">
+  </picture>
+</p>
+
 # Taidex — 台股看板與自選股工具
 
-> 對外網址：**https://tradex.nazo.com.tw**（LINE 登入，亦可由 LIFF 入口 `https://liff.line.me/1654117392-BKWVcPBa` 進入）
+> 對外網址：[**tradex.nazo.com.tw**](https://tradex.nazo.com.tw)（LINE 登入，亦可由 [LIFF 入口](https://liff.line.me/1654117392-BKWVcPBa)進入）
 
 Taidex 是一個為**投資新手**打造的台股看盤網站。設計哲學是「**使用門檻低、操作上限高**」——打開就是一個乾淨好懂的看盤介面，深度資訊（估值、法人籌碼、多因子評分）採漸進式揭露，不會一開始就把新手淹沒在數字裡；但當使用者成長後，工具的上限也跟得上。
 
@@ -19,6 +26,7 @@ Taidex 是一個為**投資新手**打造的台股看盤網站。設計哲學是
   - [6. 條件選股](#6-條件選股)
   - [7. 策略推薦（多因子評分）](#7-策略推薦多因子評分)
   - [8. 帳號與登入](#8-帳號與登入)
+- [設計語言](#設計語言)
 - [設計慣例](#設計慣例)
 - [系統架構](#系統架構)
 - [資料源與更新機制](#資料源與更新機制)
@@ -105,6 +113,16 @@ Taidex 是一個為**投資新手**打造的台股看盤網站。設計哲學是
 
 ---
 
+## 設計語言
+
+視覺系統「**金脈 Golden Ridge**」——核心比喻是**台灣山脈稜線＝行情走勢**：上升的稜線既是 K 線，也是台灣的山。深色底、琥珀金主色（`--brand: #f59e0b` → `--brand-bright: #fbbf24`），紅綠完全保留給漲跌語意。從 Logo、空狀態插圖到頁面背景的等高線地形紋，全部出自同一個比喻。
+
+| 還沒有自選股 | 還沒有持股 | 選股無結果 | 休市 / 暫無資料 |
+|:---:|:---:|:---:|:---:|
+| <img src="public/empty/watchlist.webp" width="150" alt=""> | <img src="public/empty/holdings.webp" width="150" alt=""> | <img src="public/empty/screener.webp" width="150" alt=""> | <img src="public/empty/market-closed.webp" width="150" alt=""> |
+
+素材由 AI 生成（提示詞見 `docs/superpowers/specs/2026-07-05-taidex-design-language.md`），經 `pnpm assets:prepare` 管線處理：**亮度轉 alpha**（發光線條去背，可浮在任何深色上）＋ 邊緣淡出 ＋ 分類輸出 WebP。像素轉換是有單元測試的純函式（`scripts/asset-pipeline.lib.mjs`）。
+
 ## 設計慣例
 
 - **紅漲綠跌**（台股慣例，與歐美相反）。顏色集中在 CSS 變數 `--up`（紅）/ `--down`（綠）與 `lib/format.ts` 的 `changeColorClass`，元件不得寫死色碼。
@@ -129,7 +147,7 @@ app/                    # 頁面與 API routes
 ├── liff/               # LINE LIFF 入口
 └── api/                # watchlist / holdings / market / screener / strategy / stocks / auth
 
-lib/                    # 領域邏輯（皆有 Vitest 測試，共 137 tests）
+lib/                    # 領域邏輯（皆有 Vitest 測試，全倉共 168 tests）
 ├── quotes/             # quote-service 抽象層（MIS 盤中 + DB 盤後，30s 快取與回退）
 ├── market/hours.ts     # 台股交易時段判斷（Asia/Taipei 平日 09:00–13:30）
 ├── watchlist/          # 自選股 CRUD + 排序（userId 隔離）
@@ -165,7 +183,7 @@ prisma/                 # schema + migrations（已 commit，部署時自動 mig
 - **認證**：Auth.js v5（next-auth beta）+ LINE provider + LIFF
 - **資料庫**：Prisma 6 + Cloud SQL for MySQL 8
 - **UI**：Tailwind CSS、dnd-kit（拖曳排序）、lightweight-charts（K 線）
-- **測試**：Vitest（137 tests），開發流程走 **TDD**（先寫失敗測試再實作）
+- **測試**：Vitest（168 tests），開發流程走 **TDD**（先寫失敗測試再實作）
 - **套件管理**：pnpm（corepack）、Node 22
 
 ## 開發
@@ -180,6 +198,9 @@ pnpm build               # 產線 build（standalone）
 # 資料工具（需可連 DB）
 pnpm ingest:daily        # 手動跑每日行情灌入
 pnpm backfill:history    # 回填自選∪持股近 N 月日線（--months=N，預設 2）
+
+# 設計素材（來源 PNG 放 public/taidex_assets/，不進 repo）
+pnpm assets:prepare      # 透明化+邊緣淡出+分類輸出 WebP 與 app icon
 
 # schema 變更
 pnpm exec prisma migrate dev --name <desc>

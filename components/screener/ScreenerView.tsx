@@ -4,6 +4,7 @@ import { applyConditions, sortRows, CONDITION_DEFS, PRESETS } from "@/lib/screen
 import type { Condition, NumericField, ScreenerSnapshot } from "@/lib/screener/types";
 import ConditionPanel from "@/components/screener/ConditionPanel";
 import ResultList from "@/components/screener/ResultList";
+import EmptyState from "@/components/ui/EmptyState";
 
 const DEFAULT_PRESET = PRESETS[0];
 
@@ -68,7 +69,7 @@ export default function ScreenerView() {
     setSort(p.sort);
   }
 
-  if (failed) return <p className="text-gray-400">暫無資料,稍後再試</p>;
+  if (failed) return <EmptyState variant="closed">暫無資料,稍後再試</EmptyState>;
   if (!snapshot) return <p className="text-gray-400">載入中⋯</p>;
 
   const chip = (active: boolean) =>

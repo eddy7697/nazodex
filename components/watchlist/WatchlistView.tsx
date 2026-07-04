@@ -7,6 +7,7 @@ import type { Quote } from "@/lib/quotes/types";
 import QuoteCard from "@/components/watchlist/QuoteCard";
 import QuoteRow from "@/components/watchlist/QuoteRow";
 import AddStock from "@/components/watchlist/AddStock";
+import EmptyState from "@/components/ui/EmptyState";
 
 type Item = { stockSymbol: string; sortOrder: number; quote: Quote | null };
 
@@ -120,7 +121,7 @@ export default function WatchlistView() {
         </SortableContext>
       </DndContext>
 
-      {quotes.length === 0 && <p className="text-gray-400">還沒有自選股,用上面的搜尋框加入吧。</p>}
+      {quotes.length === 0 && <EmptyState variant="watchlist">還沒有自選股,用上面的搜尋框加入吧。</EmptyState>}
     </div>
   );
 }

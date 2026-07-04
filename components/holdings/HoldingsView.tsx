@@ -5,6 +5,7 @@ import SummaryBar from "@/components/holdings/SummaryBar";
 import PositionCard from "@/components/holdings/PositionCard";
 import PositionRow from "@/components/holdings/PositionRow";
 import AddTransaction from "@/components/holdings/AddTransaction";
+import EmptyState from "@/components/ui/EmptyState";
 
 export default function HoldingsView() {
   const [positions, setPositions] = useState<ApiPosition[]>([]);
@@ -64,7 +65,7 @@ export default function HoldingsView() {
       </table>
 
       {positions.length === 0 && (
-        <p className="text-gray-400">還沒有持股紀錄,點上面「＋ 記一筆買賣」開始追蹤損益。</p>
+        <EmptyState variant="holdings">還沒有持股紀錄,點上面「＋ 記一筆買賣」開始追蹤損益。</EmptyState>
       )}
     </div>
   );

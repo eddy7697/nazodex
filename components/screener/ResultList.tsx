@@ -2,6 +2,7 @@
 import Link from "next/link";
 import { changeColorClass, fmtPrice, fmtSignedPct } from "@/lib/format";
 import type { NumericField, ScreenerRow } from "@/lib/screener/types";
+import EmptyState from "@/components/ui/EmptyState";
 
 const LIMIT = 100;
 const COLS: { field: NumericField; label: string }[] = [
@@ -60,6 +61,8 @@ export default function ResultList({
           {COLS.map((c) => <option key={c.field} value={c.field}>{c.label}排序</option>)}
         </select>
       </div>
+
+      {rows.length === 0 && <EmptyState variant="screener">沒有符合條件的股票,放寬條件再找找。</EmptyState>}
 
       {/* 手機:卡片 */}
       <div className="space-y-2 md:hidden">

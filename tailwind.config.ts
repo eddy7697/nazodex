@@ -7,6 +7,8 @@ export default {
       colors: {
         up: "var(--up)",     // 紅漲
         down: "var(--down)", // 綠跌
+        brand: "var(--brand)",
+        "brand-bright": "var(--brand-bright)",
       },
     },
   },

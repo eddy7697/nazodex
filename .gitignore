@@ -7,3 +7,4 @@ dist/
 .superpowers/
 *.tsbuildinfo
 next-env.d.ts
+public/taidex_assets/

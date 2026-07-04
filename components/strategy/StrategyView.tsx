@@ -4,6 +4,7 @@ import { recommend, STRATEGIES } from "@/lib/strategy/engine";
 import type { StrategySnapshot, Weights } from "@/lib/strategy/types";
 import StrategyCard from "@/components/strategy/StrategyCard";
 import WeightPanel from "@/components/strategy/WeightPanel";
+import EmptyState from "@/components/ui/EmptyState";
 
 const DEFAULT = STRATEGIES[0];
 const TOP_N = 20;
@@ -48,7 +49,7 @@ export default function StrategyView() {
     setWeights(s.weights);
   }
 
-  if (failed) return <p className="text-gray-400">暫無資料,稍後再試</p>;
+  if (failed) return <EmptyState variant="closed">暫無資料,稍後再試</EmptyState>;
   if (!snapshot) return <p className="text-gray-400">載入中⋯</p>;
 
   const active = STRATEGIES.find((s) => s.key === activeKey);
@@ -85,7 +86,7 @@ export default function StrategyView() {
           <StrategyCard key={rec.row.symbol} rank={i + 1} rec={rec} watched={watched} onAdd={addToWatchlist} />
         ))}
       </div>
-      {recs.length === 0 && <p className="text-gray-400">今日無符合條件的標的</p>}
+      {recs.length === 0 && <EmptyState variant="screener">今日無符合條件的標的</EmptyState>}
 
       <p className="pb-2 text-center text-xs text-gray-600">依公開市場數據計算,僅供學習參考,非投資建議</p>
     </div>

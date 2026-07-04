@@ -7,7 +7,16 @@
   --down: #12b76a; /* 綠跌 */
   --bg: #0b0f14;
   --card: #131a22;
+  --brand: #f59e0b;        /* 品牌金(金脈 Golden Ridge) */
+  --brand-bright: #fbbf24; /* 品牌金亮部 */
 }
-html, body { background: var(--bg); color: #e6edf3; }
+/* 底色 + 等高線地形紋(極低對比)都放 html——html 背景會傳播到整個畫布,
+   內容比視口短時也鋪滿;body 必須透明,否則其純色底會蓋住紋理。
+   不用 background-attachment: fixed(iOS Safari 支援不佳)。 */
+html {
+  background: var(--bg) url("/textures/contour.webp");
+  background-size: 640px;
+}
+body { background: transparent; color: #e6edf3; }
 /* 擋雙擊放大(iOS Safari 忽略 viewport meta 的 user-scalable,此屬性仍有效);雙指縮放由 viewport meta 擋 */
 html { touch-action: manipulation; }
