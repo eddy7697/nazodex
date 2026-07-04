@@ -17,6 +17,7 @@ pnpm backfill:history  # 回填自選∪持股近 N 月日線(--months=N,預設 
 
 - 套件管理用 **pnpm**（corepack, v11）。Node 22。TypeScript strict。
 - 測試走 **TDD**：先寫失敗測試再實作。
+- **開發流程**：未來任何功能開發，先從 `master` 建立分支（`feat/<desc>`），在分支上開發並通過完整測試（`pnpm test` + `pnpm exec tsc --noEmit` + `pnpm build`）後，才發 PR 合回 `master`。不直接 commit 到 `master`。
 
 ## 架構（單體 Next.js App Router 全端）
 
