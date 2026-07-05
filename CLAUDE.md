@@ -75,6 +75,7 @@ pnpm assets:prepare    # 設計素材管線:public/taidex_assets/ 原始 PNG(git
 - 大盤總覽:`docs/superpowers/specs/2026-07-03-taidex-market-overview-design.md`
 - 條件選股:`docs/superpowers/specs/2026-07-03-taidex-screener-design.md` + `docs/superpowers/plans/2026-07-03-taidex-screener.md`
 - 設計語言:`docs/superpowers/specs/2026-07-05-taidex-design-language.md`（含 AI 生圖提示詞）+ `docs/superpowers/plans/2026-07-05-taidex-design-language.md`
+- 新聞/事件方向:`docs/superpowers/specs/2026-07-05-taidex-news-events-direction.md`（方向討論記錄,含波動四層模型、M1–M4 milestone、YAGNI 界線;非實作規格）
 
 ## 路線圖
 
@@ -82,6 +83,7 @@ pnpm assets:prepare    # 設計素材管線:public/taidex_assets/ 原始 PNG(git
 1. 持股損益延伸:股利/除權息已上線(2026-07-03,手動記帳;自動抓除權息預填仍為 YAGNI),剩報表圖表。
 2. 大盤延伸:上櫃漲跌家數/法人、產業下鑽(v1 刻意不做,見 spec 的 YAGNI 節);大盤 K 線已上線(2026-07-03)。
 3. 選股延伸:策略推薦(多因子評分)已上線(2026-07-03);上櫃股票、技術指標(等 DailyQuote 歷史累積,約 2026-10 起可做均線)、產業別篩選、儲存自訂策略(v1 刻意不做,見 spec 的 YAGNI 節)。
+4. 新聞/事件(2026-07-05 定向,見上方方向文件):M1 官方事件層(MOPS 重大訊息+注意/處置股)→ M2 個股新聞牆(RSS)→ M3 LLM 知識標籤 → M4 新聞×籌碼對照。定位是「呈現給人做判斷」,**不進評分引擎**(無法回測)。
 
 v1 polish 全數完成(2026-07-03):拖曳排序、盤後標示、成交量統一、AddStock debounce、選股一鍵加自選、大盤指數列(首頁,`/api/market/indices`)+ 卡片迷你走勢線(近月收盤,`/api/watchlist/sparklines`;歷史以 `pnpm backfill:history` 回填自選∪持股近 2 月,新自選靠每日 ingest 累積)。
 
