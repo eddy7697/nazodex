@@ -36,6 +36,12 @@ RUN pnpm exec esbuild scripts/backfill-history.ts \
       --bundle --platform=node --format=esm --target=node22 \
       --packages=external \
       --outfile=dist/backfill-history.mjs
+# FinMind 全市場歷史回填(一次性);於 pod 內 `node dist/backfill-finmind.mjs` 執行,
+# 需 FINMIND_TOKEN 與 DATABASE_URL。Same bundling rationale as ingest-daily above.
+RUN pnpm exec esbuild scripts/backfill-finmind.ts \
+      --bundle --platform=node --format=esm --target=node22 \
+      --packages=external \
+      --outfile=dist/backfill-finmind.mjs
 # Strip devDependencies (tsx, typescript, vitest, esbuild, prisma CLI, ...)
 # now that build artifacts (.next/standalone, dist/ingest-daily.mjs) exist.
 # pnpm keeps @prisma/client's generated engine/client inside its content
