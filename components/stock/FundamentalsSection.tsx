@@ -23,7 +23,7 @@ export default function FundamentalsSection({ revenues, eps }: { revenues: Reven
           <div className="flex h-16 items-end gap-1" aria-label="近 12 月營收長條圖">
             {revenues.map((p) => (
               <div key={p.month} className="flex-1" title={`${p.month}:${p.revenueBillions.toFixed(1)} 億`}>
-                <div className="w-full rounded-t bg-brand/70" style={{ height: `${Math.max(p.barPct, 2)}%` }} />
+                <div className="w-full rounded-t bg-brand opacity-70" style={{ height: `${Math.max(p.barPct, 2)}%` }} />
               </div>
             ))}
           </div>
