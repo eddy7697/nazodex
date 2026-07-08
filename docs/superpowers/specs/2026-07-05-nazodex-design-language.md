@@ -1,4 +1,4 @@
-# Taidex 設計語言 ——「金脈 Golden Ridge」+ 圖片素材生成提示詞
+# NazoDex 設計語言 ——「金脈 Golden Ridge」+ 圖片素材生成提示詞
 
 日期:2026-07-05
 狀態:訪談定案
@@ -49,11 +49,11 @@
 
 > A minimalist abstract logo mark for a premium stock-market dashboard app. The mark is a single continuous rising line that reads simultaneously as a stock-price trend line and a mountain ridge silhouette: two or three angular peaks, each higher than the last, the final peak clearly the highest, suggesting upward momentum. Clean flat vector style, the line rendered in an amber-gold gradient from #f59e0b to #fbbf24 with a very subtle warm glow, on a solid very dark navy background (#0b0f14). Geometric, confident, modern fintech aesthetic. The mark is perfectly centered with generous empty space around it. Flat 2D vector, no 3D, no shadows, no text, no letters, no red, no green.
 
-字標(wordmark)「Taidex」**不建議用生圖工具生成**——文字交給字體處理最乾淨。建議搭配幾何無襯線字體(如 Inter、Space Grotesk、Manrope 的 SemiBold),金色或近白 `#e6edf3` 排在圖形右側。
+字標(wordmark)「NazoDex」**不建議用生圖工具生成**——文字交給字體處理最乾淨。建議搭配幾何無襯線字體(如 Inter、Space Grotesk、Manrope 的 SemiBold),金色或近白 `#e6edf3` 排在圖形右側。
 
 若仍想看含字標的合成效果,可加一句:
 
-> Next to the mark, add the wordmark "Taidex" in a clean geometric sans-serif font, colored soft white (#e6edf3). Keep the spelling exactly "Taidex".
+> Next to the mark, add the wordmark "NazoDex" in a clean geometric sans-serif font, colored soft white (#e6edf3). Keep the spelling exactly "NazoDex".
 
 ### 2. App Icon / Favicon
 

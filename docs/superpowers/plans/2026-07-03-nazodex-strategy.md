@@ -10,7 +10,7 @@
 
 ## Global Constraints
 
-- spec:`docs/superpowers/specs/2026-07-03-taidex-strategy-design.md`(權重表、因子定義、理由措辭以 spec 為準)
+- spec:`docs/superpowers/specs/2026-07-03-nazodex-strategy-design.md`(權重表、因子定義、理由措辭以 spec 為準)
 - 紅漲綠跌:顏色只用 `text-up`/`text-down`/`bg-up`(CSS 變數),元件不得寫死 hex。
 - 價格顯示用 `lib/format.ts`(`fmtPrice`/`fmtSignedPct`)。
 - 所有上游 fetch 8s AbortController;注入測試假 fetch 時簽名為 `typeof fetch`。

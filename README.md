@@ -1,15 +1,15 @@
 <p align="center">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="public/brand/logo-name.webp">
-    <img src="public/brand/logo.webp" width="220" alt="Taidex">
+    <img src="public/brand/logo.webp" width="220" alt="NazoDex">
   </picture>
 </p>
 
-# Taidex — 台股看板與自選股工具
+# NazoDex — 台股看板與自選股工具
 
-> 對外網址：[**tradex.nazo.com.tw**](https://tradex.nazo.com.tw)（LINE 登入，亦可由 [LIFF 入口](https://liff.line.me/1654117392-BKWVcPBa)進入）
+> 對外網址：[**nazodex.nazo.com.tw**](https://nazodex.nazo.com.tw)（LINE 登入，亦可由 [LIFF 入口](https://liff.line.me/1654117392-BKWVcPBa)進入）
 
-Taidex 是一個為**投資新手**打造的台股看盤網站。設計哲學是「**使用門檻低、操作上限高**」——打開就是一個乾淨好懂的看盤介面，深度資訊（估值、法人籌碼、多因子評分）採漸進式揭露，不會一開始就把新手淹沒在數字裡；但當使用者成長後，工具的上限也跟得上。
+NazoDex 是一個為**投資新手**打造的台股看盤網站。設計哲學是「**使用門檻低、操作上限高**」——打開就是一個乾淨好懂的看盤介面，深度資訊（估值、法人籌碼、多因子評分）採漸進式揭露，不會一開始就把新手淹沒在數字裡；但當使用者成長後，工具的上限也跟得上。
 
 全站資料**只使用免費公開資料源**（證交所 MIS、TWSE / TPEX OpenAPI），沒有任何付費行情授權，也因此適合個人與家庭自架使用。
 
@@ -121,7 +121,7 @@ Taidex 是一個為**投資新手**打造的台股看盤網站。設計哲學是
 |:---:|:---:|:---:|:---:|
 | <img src="public/empty/watchlist.webp" width="150" alt=""> | <img src="public/empty/holdings.webp" width="150" alt=""> | <img src="public/empty/screener.webp" width="150" alt=""> | <img src="public/empty/market-closed.webp" width="150" alt=""> |
 
-素材由 AI 生成（提示詞見 `docs/superpowers/specs/2026-07-05-taidex-design-language.md`），經 `pnpm assets:prepare` 管線處理：**亮度轉 alpha**（發光線條去背，可浮在任何深色上）＋ 邊緣淡出 ＋ 分類輸出 WebP。像素轉換是有單元測試的純函式（`scripts/asset-pipeline.lib.mjs`）。
+素材由 AI 生成（提示詞見 `docs/superpowers/specs/2026-07-05-nazodex-design-language.md`），經 `pnpm assets:prepare` 管線處理：**亮度轉 alpha**（發光線條去背，可浮在任何深色上）＋ 邊緣淡出 ＋ 分類輸出 WebP。像素轉換是有單元測試的純函式（`scripts/asset-pipeline.lib.mjs`）。
 
 ## 設計慣例
 
@@ -199,7 +199,7 @@ pnpm build               # 產線 build（standalone）
 pnpm ingest:daily        # 手動跑每日行情灌入
 pnpm backfill:history    # 回填自選∪持股近 N 月日線（--months=N，預設 2）
 
-# 設計素材（來源 PNG 放 public/taidex_assets/，不進 repo）
+# 設計素材（來源 PNG 放 public/nazodex_assets/，不進 repo）
 pnpm assets:prepare      # 透明化+邊緣淡出+分類輸出 WebP 與 app icon
 
 # schema 變更
@@ -210,10 +210,10 @@ pnpm exec prisma migrate dev --name <desc>
 
 ## 部署
 
-無 CI，本機滾動更新：以 `tradex` 租戶跑在自架 GKE 平台（`~/devsecops-nazo`）。
+無 CI，本機滾動更新：以 `nazodex` 租戶跑在自架 GKE 平台（`~/devsecops-nazo`）。
 
 1. 改完 code、測試通過。
-2. 在 `~/devsecops-nazo` 執行 `bash kubernetes/tenants/tradex/build-update.sh`（首次部署用 `build-init.sh`）——內含 build + push image + `make deploy tradex`。
+2. 在 `~/devsecops-nazo` 執行 `bash kubernetes/tenants/nazodex/build-update.sh`（首次部署用 `build-init.sh`）——內含 build + push image + `make deploy nazodex`。
 3. Deployment 的 initContainer 每次 rollout 自動跑 `prisma migrate deploy`（只往前、非破壞性）。
 4. 每日行情由 K8s CronJob（15:00 Asia/Taipei）執行 image 內的 `dist/ingest-daily.mjs`。
 
@@ -239,7 +239,7 @@ v1（看盤 / 自選股、持股損益、大盤總覽、條件選股、策略推
 
 7. **除權息行事曆與自動預填**：目前股利記帳是手動輸入（v1 判定自動抓取為 YAGNI）。長期可接 TWSE 除權息公告，對持股自動產生待確認的股利交易草稿——記帳從「主動記」變成「按一下確認」。
 8. **FinMind 基本面資料**：營收、EPS、財報等基本面（架構上已預留為未來資料源），可作為策略推薦的第六因子（品質因子），也能在個股頁加基本面分頁。
-9. **到價 / 事件通知**：既然登入即是 LINE，天然適合走 LINE Notify / Messaging API 推播——自選股到價提醒、持股除權息前提醒、策略榜單異動摘要。這會把 Taidex 從「主動打開看」升級為「重要時刻找上門」。
+9. **到價 / 事件通知**：既然登入即是 LINE，天然適合走 LINE Notify / Messaging API 推播——自選股到價提醒、持股除權息前提醒、策略榜單異動摘要。這會把 NazoDex 從「主動打開看」升級為「重要時刻找上門」。
 10. **多市場**：quote-service 的「換源 / 加源只動這一層」設計，理論上可延伸美股或 ETF 專區——但這超出「給家人用的台股工具」的初衷，除非真實需求出現，否則維持 YAGNI。
 
 ### 不變的原則

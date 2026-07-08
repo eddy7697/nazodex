@@ -4,10 +4,10 @@
 2. 產生 AUTH_SECRET:`npx auth secret`
 3. 建立 secret:`kubectl apply -f k8s/secret.example.yaml`(先填好值)
 4. 遷移 DB:初始 migration(`prisma/migrations/0001_init/`)已隨程式碼提交,一次性 Job 或本機連線執行 `pnpm exec prisma migrate deploy` 即可套用、建立所有資料表(User、Account、Session、VerificationToken、Stock、WatchlistItem、DailyQuote、UserColumnPref)。之後 schema 若有異動,本機用 `pnpm exec prisma migrate dev --name <變更說明>` 產生新的 migration 目錄並一併提交,再由 `migrate deploy` 套用到正式環境。
-5. Build & push:`docker build -t REGISTRY/taidex:latest . && docker push REGISTRY/taidex:latest`
+5. Build & push:`docker build -t REGISTRY/nazodex:latest . && docker push REGISTRY/nazodex:latest`
 6. 部署:`kubectl apply -f k8s/deployment.yaml -f k8s/cronjob.yaml`
-7. 首次灌資料:手動觸發一次 `kubectl create job --from=cronjob/taidex-ingest-daily first-run`
-8. 對外:用你叢集既有的 Ingress / LoadBalancer 指向 taidex-web Service,綁網域與憑證
+7. 首次灌資料:手動觸發一次 `kubectl create job --from=cronjob/nazodex-ingest-daily first-run`
+8. 對外:用你叢集既有的 Ingress / LoadBalancer 指向 nazodex-web Service,綁網域與憑證
 9. Cloud SQL 連線:用 Cloud SQL Auth Proxy sidecar 或私有 IP(擇一,於 deployment 補上)
 
 > `middleware.ts` 會 import `auth()`(含 PrismaAdapter)。這在自架 GKE / Node server 上沒問題,因為 Next.js standalone/Node 部署下 middleware 是跑在 Node runtime,不是 Vercel edge runtime。
@@ -31,16 +31,16 @@
 
 ### 驗證方式
 
-- 檔案存在確認:`docker run --rm taidex:test ls -la dist` → 確認 `dist/ingest-daily.mjs` 存在於 image 內。
+- 檔案存在確認:`docker run --rm nazodex:test ls -la dist` → 確認 `dist/ingest-daily.mjs` 存在於 image 內。
 - **實際執行驗證**(比僅確認檔案存在更進一步):
   ```
   docker run --rm \
     -e DATABASE_URL="mysql://user:pass@localhost:3306/nonexistent" \
     -e AUTH_SECRET=test -e AUTH_LINE_ID=x -e AUTH_LINE_SECRET=x -e AUTH_URL=http://localhost:3000 \
-    taidex:test node dist/ingest-daily.mjs
+    nazodex:test node dist/ingest-daily.mjs
   ```
   實際輸出 `fetched 1368 rows`(成功向 TWSE OpenAPI 取得當日行情、`@/*` alias 已正確解析、`@prisma/client` 也正確載入),只在真正寫入不存在的資料庫時失敗(`Can't reach database server at localhost:3306`,預期中的錯誤,因為測試環境沒有真正的 MySQL)。這證明 bundle 本身、路徑別名解析、Prisma client 載入都是正確的,唯一未驗證的是「連到真正 Cloud SQL 之後」的寫入路徑(需要實際叢集/資料庫,超出本機驗證範圍)。
-- 同樣方式也驗證了 web server:`docker run -d -p 18080:3000 ... taidex:test` 後 `curl http://localhost:18080/login` 回應 `HTTP 200`。
+- 同樣方式也驗證了 web server:`docker run -d -p 18080:3000 ... nazodex:test` 後 `curl http://localhost:18080/login` 回應 `HTTP 200`。
 
 ## Cloud SQL 連線
 
