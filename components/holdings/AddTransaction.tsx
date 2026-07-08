@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { estimateFee, estimateTax, estimateNhi, DIV_TRANSFER_FEE } from "@/lib/holdings/fees";
 import type { Side } from "@/lib/holdings/positions";
 
@@ -10,10 +10,17 @@ const SIDE_OPTS: { value: Side; label: string; cls: string }[] = [
   { value: "DIV_STOCK", label: "配股", cls: "text-amber-400" },
 ];
 
+// 由除權息建議卡「帶入記帳」一鍵預填交易表單用
+export type TxPrefill = {
+  symbol: string; name: string; side: Side;
+  quantity: number; price: number; date: string; fee: number; tax: number;
+};
+
 export default function AddTransaction({
-  onAdded, sharesBySymbol,
+  onAdded, sharesBySymbol, prefill, onPrefillConsumed,
 }: {
   onAdded: () => void; sharesBySymbol: Record<string, number>;
+  prefill?: TxPrefill | null; onPrefillConsumed?: () => void;
 }) {
   const [open, setOpen] = useState(false);
   const [q, setQ] = useState("");
@@ -28,6 +35,21 @@ export default function AddTransaction({
   const [date, setDate] = useState(() => new Date().toISOString().slice(0, 10));
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
+
+  useEffect(() => {
+    if (!prefill) return;
+    setOpen(true);
+    setPicked({ symbol: prefill.symbol, name: prefill.name });
+    setSide(prefill.side);
+    setQuantity(String(prefill.quantity));
+    setPrice(prefill.side === "DIV_STOCK" ? "" : String(prefill.price));
+    setDate(prefill.date);
+    setFee(String(prefill.fee));
+    setTax(String(prefill.tax));
+    setFeeTouched(true); // 費稅來自建議估算,不要被自動重估蓋掉
+    onPrefillConsumed?.();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [prefill]);
 
   async function search(v: string) {
     setQ(v); setPicked(null);

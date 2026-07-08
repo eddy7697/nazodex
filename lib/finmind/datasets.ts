@@ -67,3 +67,43 @@ export async function getStockInfo(client: FinMindClient): Promise<FinMindStockI
   const raw = await client.fetchDataset({ dataset: "TaiwanStockInfo" });
   return parseStockInfo(raw);
 }
+
+export type FinMindDividendEvent = {
+  symbol: string;
+  kind: "CASH" | "STOCK";
+  exDate: string;              // ISO 除息/除權交易日
+  perShare: number;            // CASH:元/股;STOCK:面額元/股(每股配 perShare/10 股)
+  paymentDate: string | null;  // 現金發放日
+  year: string;                // 股利所屬年度("114年")
+};
+
+type RawDividend = Record<string, unknown>;
+
+const isIsoDate = (s: unknown): s is string => typeof s === "string" && /^\d{4}-\d{2}-\d{2}$/.test(s);
+const numOr0 = (v: unknown): number => (Number.isFinite(Number(v)) ? Number(v) : 0);
+
+export function parseDividends(raw: unknown[]): FinMindDividendEvent[] {
+  const out: FinMindDividendEvent[] = [];
+  for (const r of raw as RawDividend[]) {
+    const symbol = String(r.stock_id ?? "").trim();
+    const year = String(r.year ?? "").trim();
+    if (!symbol) continue;
+    const cash = numOr0(r.CashEarningsDistribution) + numOr0(r.CashStatutorySurplus);
+    if (cash > 0 && isIsoDate(r.CashExDividendTradingDate)) {
+      out.push({
+        symbol, kind: "CASH", exDate: r.CashExDividendTradingDate, perShare: cash,
+        paymentDate: isIsoDate(r.CashDividendPaymentDate) ? r.CashDividendPaymentDate : null, year,
+      });
+    }
+    const stock = numOr0(r.StockEarningsDistribution) + numOr0(r.StockStatutorySurplus);
+    if (stock > 0 && isIsoDate(r.StockExDividendTradingDate)) {
+      out.push({ symbol, kind: "STOCK", exDate: r.StockExDividendTradingDate, perShare: stock, paymentDate: null, year });
+    }
+  }
+  return out;
+}
+
+export async function getDividends(client: FinMindClient, symbol: string, startDate: string): Promise<FinMindDividendEvent[]> {
+  const raw = await client.fetchDataset({ dataset: "TaiwanStockDividend", data_id: symbol, start_date: startDate });
+  return parseDividends(raw);
+}

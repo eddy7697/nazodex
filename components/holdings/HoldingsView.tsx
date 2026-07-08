@@ -4,7 +4,8 @@ import type { ApiPosition, ApiSummary } from "@/components/holdings/types";
 import SummaryBar from "@/components/holdings/SummaryBar";
 import PositionCard from "@/components/holdings/PositionCard";
 import PositionRow from "@/components/holdings/PositionRow";
-import AddTransaction from "@/components/holdings/AddTransaction";
+import AddTransaction, { type TxPrefill } from "@/components/holdings/AddTransaction";
+import DividendSuggestions from "@/components/holdings/DividendSuggestions";
 import EmptyState from "@/components/ui/EmptyState";
 
 export default function HoldingsView() {
@@ -12,6 +13,8 @@ export default function HoldingsView() {
   const [summary, setSummary] = useState<ApiSummary | null>(null);
   const [expanded, setExpanded] = useState<string | null>(null);
   const [updatedAt, setUpdatedAt] = useState<string>("");
+  const [prefill, setPrefill] = useState<TxPrefill | null>(null);
+  const [sugKey, setSugKey] = useState(0);
 
   const load = useCallback(async () => {
     const res = await fetch("/api/holdings");
@@ -30,8 +33,10 @@ export default function HoldingsView() {
 
   return (
     <div>
-      <AddTransaction onAdded={load}
-        sharesBySymbol={Object.fromEntries(positions.filter((p) => p.shares > 0).map((p) => [p.symbol, p.shares]))} />
+      <AddTransaction onAdded={() => { load(); setSugKey((k) => k + 1); }}
+        sharesBySymbol={Object.fromEntries(positions.filter((p) => p.shares > 0).map((p) => [p.symbol, p.shares]))}
+        prefill={prefill} onPrefillConsumed={() => setPrefill(null)} />
+      <DividendSuggestions onPrefill={setPrefill} refreshKey={sugKey} />
       {summary && <SummaryBar summary={summary} />}
       <div className="mb-2 text-right text-xs text-gray-500">更新於 {updatedAt}</div>
 

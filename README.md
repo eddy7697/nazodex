@@ -185,7 +185,7 @@ prisma/                 # schema + migrations（已 commit，部署時自動 mig
 - **認證**：Auth.js v5（next-auth beta）+ LINE provider + LIFF
 - **資料庫**：Prisma 6 + Cloud SQL for MySQL 8
 - **UI**：Tailwind CSS、dnd-kit（拖曳排序）、lightweight-charts（K 線）
-- **測試**：Vitest（200 tests），開發流程走 **TDD**（先寫失敗測試再實作）
+- **測試**：Vitest（219 tests），開發流程走 **TDD**（先寫失敗測試再實作）
 - **套件管理**：pnpm（corepack）、Node 22
 
 ## 開發
@@ -241,7 +241,7 @@ v1（看盤 / 自選股、持股損益、大盤總覽、條件選股、策略推
 
 ### 長期（新能力）
 
-7. **除權息行事曆與自動預填**：目前股利記帳是手動輸入（v1 判定自動抓取為 YAGNI）。長期可接 TWSE 除權息公告，對持股自動產生待確認的股利交易草稿——記帳從「主動記」變成「按一下確認」。
+7. **除權息行事曆與自動預填**：除權息建議卡已上線（2026-07-09，FinMind 週更行事曆、比對持股與自選，未記帳事件一鍵帶入表單），目前仍需人工確認記帳（自動灌入仍為 YAGNI）。
 8. **基本面資料（月營收 / 季 EPS）已上線（2026-07-09）**：月營收與季 EPS 改用 TWSE OpenAPI（`t187ap05_L` / `t187ap14_L`，非 FinMind）灌入 `MonthlyRevenue` / `QuarterlyEps` 表，成為策略推薦的第六因子「成長」（月營收年增率），並在個股頁新增基本面區塊。FinMind 仍只用於歷史回填/股票宇宙/除權息；財報等更深入基本面尚未串接。
 9. **到價 / 事件通知**：既然登入即是 LINE，天然適合走 LINE Notify / Messaging API 推播——自選股到價提醒、持股除權息前提醒、策略榜單異動摘要。這會把 NazoDex 從「主動打開看」升級為「重要時刻找上門」。
 10. **多市場**：quote-service 的「換源 / 加源只動這一層」設計，理論上可延伸美股或 ETF 專區——但這超出「給家人用的台股工具」的初衷，除非真實需求出現，否則維持 YAGNI。

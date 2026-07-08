@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from "vitest";
-import { parseStockPrice, parseStockInfo, getStockPrice, getStockInfo } from "@/lib/finmind/datasets";
+import { parseStockPrice, parseStockInfo, getStockPrice, getStockInfo, parseDividends, getDividends } from "@/lib/finmind/datasets";
 import type { FinMindClient } from "@/lib/finmind/client";
 
 const priceRaw = [
@@ -64,5 +64,43 @@ describe("dataset wrappers", () => {
     const rows = await getStockInfo(client);
     expect(fetchDataset).toHaveBeenCalledWith({ dataset: "TaiwanStockInfo" });
     expect(rows.length).toBeGreaterThan(0);
+  });
+});
+
+const dividendRaw = [
+  { // 現金+配股同公告(台新金型)
+    date: "2026-07-27", stock_id: "2887", year: "114年",
+    StockEarningsDistribution: 0.1, StockStatutorySurplus: 0,
+    StockExDividendTradingDate: "2026-07-21",
+    CashEarningsDistribution: 1.0, CashStatutorySurplus: 0.2,
+    CashExDividendTradingDate: "2026-07-21", CashDividendPaymentDate: "2026-08-19",
+  },
+  { // 純現金、無配股(台積電型;配股欄 0/空)
+    date: "2026-06-01", stock_id: "2330", year: "115年",
+    StockEarningsDistribution: 0, StockExDividendTradingDate: "",
+    CashEarningsDistribution: 4.5, CashExDividendTradingDate: "2026-06-16", CashDividendPaymentDate: "2026-07-10",
+  },
+  { // 髒列:兩者皆無日期 → 不產生事件
+    date: "2020-01-01", stock_id: "9999", year: "108年", CashEarningsDistribution: 0, StockEarningsDistribution: 0 },
+];
+
+describe("parseDividends", () => {
+  it("現金與配股拆成獨立事件;盈餘+公積相加;發放日僅現金有", () => {
+    const events = parseDividends(dividendRaw);
+    const e2887 = events.filter((e) => e.symbol === "2887");
+    expect(e2887).toHaveLength(2);
+    const cash = e2887.find((e) => e.kind === "CASH")!;
+    expect(cash).toEqual({ symbol: "2887", kind: "CASH", exDate: "2026-07-21", perShare: 1.2, paymentDate: "2026-08-19", year: "114年" });
+    const stock = e2887.find((e) => e.kind === "STOCK")!;
+    expect(stock.perShare).toBeCloseTo(0.1);
+    expect(stock.paymentDate).toBeNull();
+    expect(events.filter((e) => e.symbol === "2330")).toHaveLength(1);
+    expect(events.filter((e) => e.symbol === "9999")).toHaveLength(0);
+  });
+  it("getDividends 帶 dataset/data_id/start_date", async () => {
+    const fetchDataset = vi.fn(async () => dividendRaw);
+    const client = { fetchDataset } as unknown as FinMindClient;
+    await getDividends(client, "2887", "2025-07-09");
+    expect(fetchDataset).toHaveBeenCalledWith({ dataset: "TaiwanStockDividend", data_id: "2887", start_date: "2025-07-09" });
   });
 });

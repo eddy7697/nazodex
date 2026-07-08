@@ -127,3 +127,15 @@ model QuarterlyEps {
   eps         Float    // 基本每股盈餘(元)
   @@unique([stockSymbol, quarter])
 }
+
+model DividendEvent {
+  id          String    @id @default(cuid())
+  stockSymbol String
+  kind        String    // "CASH" | "STOCK"
+  exDate      DateTime  @db.Date  // 除息/除權交易日
+  perShare    Float     // CASH:元/股(盈餘+公積);STOCK:股票股利面額元/股(每股配 perShare/10 股)
+  paymentDate DateTime? @db.Date  // 現金股利發放日(公告才有;STOCK 為 null)
+  year        String    // 股利所屬年度,如 "114年"
+  @@unique([stockSymbol, exDate, kind])
+  @@index([exDate])
+}
