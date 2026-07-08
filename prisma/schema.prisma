@@ -109,3 +109,21 @@ model UserColumnPref {
   columns Json   // 使用者選擇顯示的欄位陣列,如 ["price","changePct","yield"]
   user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
+
+model MonthlyRevenue {
+  id          String   @id @default(cuid())
+  stockSymbol String
+  month       DateTime @db.Date // 該月 1 日(UTC)
+  revenue     BigInt   // 當月營收,單位:千元(TWSE t187ap05_L 原始單位)
+  yoyPct      Float?   // 去年同月增減%(官方已算好;上市首年無值)
+  @@unique([stockSymbol, month])
+  @@index([month])
+}
+
+model QuarterlyEps {
+  id          String   @id @default(cuid())
+  stockSymbol String
+  quarter     DateTime @db.Date // 季首日(UTC):Q1=01-01/Q2=04-01/Q3=07-01/Q4=10-01
+  eps         Float    // 基本每股盈餘(元)
+  @@unique([stockSymbol, quarter])
+}
