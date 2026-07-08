@@ -72,7 +72,7 @@ export default function StrategyView() {
         {snapshot.date && <span className="text-xs text-gray-500">{snapshot.date}</span>}
       </div>
 
-      <p className="text-xs text-gray-500">{activeKey === "custom" ? "自己調配五力權重" : active?.blurb}</p>
+      <p className="text-xs text-gray-500">{activeKey === "custom" ? "自己調配六力權重" : active?.blurb}</p>
 
       <button onClick={() => setPanelOpen((o) => !o)} className="text-sm text-gray-400">
         {panelOpen ? "▾ 收合配方" : "▸ 調整配方"}

@@ -3,9 +3,9 @@ import type { FactorKey, FactorRow, FactorScores, Recommendation, StrategyDef, W
 export const UNIVERSE_MIN_LOTS = 200; // 排除殭屍股
 export const UNIVERSE_MIN_CLOSE = 5;  // 排除雞蛋水餃股
 
-export const FACTOR_KEYS: FactorKey[] = ["value", "dividend", "momentum", "chips", "heat"];
+export const FACTOR_KEYS: FactorKey[] = ["value", "dividend", "momentum", "chips", "heat", "growth"];
 export const FACTOR_LABELS: Record<FactorKey, string> = {
-  value: "價值", dividend: "收息", momentum: "動能", chips: "籌碼", heat: "熱度",
+  value: "價值", dividend: "收息", momentum: "動能", chips: "籌碼", heat: "熱度", growth: "成長",
 };
 
 export function inUniverse(r: FactorRow): boolean {
@@ -42,12 +42,14 @@ export function computeFactorScores(rows: FactorRow[]): FactorScores[] {
   const chgHigh = percentileRanks(rows.map((r) => r.changePct));
   const chipsHigh = percentileRanks(rows.map((r) => r.chipsRatio));
   const heatHigh = percentileRanks(rows.map((r) => r.volumeLots));
+  const growthHigh = percentileRanks(rows.map((r) => r.revenueYoyPct));
   return rows.map((_, i) => ({
     value: mean2(peLow[i], pbLow[i]),
     dividend: yieldHigh[i],
     momentum: mean2(biasHigh[i], chgHigh[i]),
     chips: chipsHigh[i],
     heat: heatHigh[i],
+    growth: growthHigh[i],
   }));
 }
 
@@ -83,6 +85,7 @@ function reasonText(k: FactorKey, score: number, row: FactorRow): string {
         : `價格動能${pctPhrase(score)}`;
     case "chips": return `法人買超力道${pctPhrase(score)}`;
     case "heat": return `成交熱度${pctPhrase(score)}`;
+    case "growth": return `營收年增動能${pctPhrase(score)}`;
   }
 }
 
@@ -113,14 +116,16 @@ export function recommend(rows: FactorRow[], weights: Weights, topN = 20): Recom
 }
 
 export const STRATEGIES: StrategyDef[] = [
-  { key: "balanced", label: "均衡精選", blurb: "五力平均、體質全面",
-    weights: { value: 0.25, dividend: 0.25, momentum: 0.2, chips: 0.2, heat: 0.1 } },
+  { key: "balanced", label: "均衡精選", blurb: "六力平均、體質全面",
+    weights: { value: 0.2, dividend: 0.2, momentum: 0.15, chips: 0.15, heat: 0.1, growth: 0.2 } },
   { key: "income", label: "存股收息", blurb: "領股息為主,兼顧不買貴",
-    weights: { value: 0.25, dividend: 0.45, momentum: 0.05, chips: 0.15, heat: 0.1 } },
+    weights: { value: 0.25, dividend: 0.45, momentum: 0.05, chips: 0.1, heat: 0.05, growth: 0.1 } },
   { key: "value", label: "價值獵手", blurb: "便宜是硬道理",
-    weights: { value: 0.5, dividend: 0.2, momentum: 0.05, chips: 0.15, heat: 0.1 } },
+    weights: { value: 0.5, dividend: 0.15, momentum: 0.05, chips: 0.1, heat: 0.05, growth: 0.15 } },
   { key: "momentum", label: "動能突擊", blurb: "順勢而為、量價齊揚",
-    weights: { value: 0.05, dividend: 0.05, momentum: 0.45, chips: 0.25, heat: 0.2 } },
+    weights: { value: 0.05, dividend: 0.05, momentum: 0.4, chips: 0.2, heat: 0.15, growth: 0.15 } },
   { key: "chips", label: "主力同行", blurb: "跟著法人腳步",
-    weights: { value: 0.1, dividend: 0.05, momentum: 0.2, chips: 0.5, heat: 0.15 } },
+    weights: { value: 0.1, dividend: 0.05, momentum: 0.15, chips: 0.5, heat: 0.1, growth: 0.1 } },
+  { key: "growth", label: "成長飛輪", blurb: "營收年增領航",
+    weights: { value: 0.1, dividend: 0.05, momentum: 0.2, chips: 0.1, heat: 0.05, growth: 0.5 } },
 ];

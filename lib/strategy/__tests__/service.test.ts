@@ -14,33 +14,42 @@ describe("buildFactorRows", () => {
   it("join 月均與 T86,算 biasPct 與 chipsRatio(佔成交量%)", () => {
     const out = buildFactorRows(snap,
       [{ symbol: "2330", close: 1085, monthlyAvg: 1000 }],
-      [{ symbol: "2330", totalNetShares: 2_100_000 }]);
+      [{ symbol: "2330", totalNetShares: 2_100_000 }],
+      new Map());
     const tsmc = out.rows.find((r) => r.symbol === "2330")!;
     expect(tsmc.biasPct).toBeCloseTo(8.5, 5);        // (1085-1000)/1000×100
     expect(tsmc.chipsRatio).toBeCloseTo(10, 5);      // 2,100,000 / 21,000,000 股 ×100
     expect(out.date).toBe("2026-07-02");
   });
   it("無對應月均/法人、或成交量 0 → null(除零保護)", () => {
-    const out = buildFactorRows(snap, [], [{ symbol: "1101", totalNetShares: 5000 }]);
+    const out = buildFactorRows(snap, [], [{ symbol: "1101", totalNetShares: 5000 }], new Map());
     const cement = out.rows.find((r) => r.symbol === "1101")!;
     expect(cement.biasPct).toBeNull();
     expect(cement.chipsRatio).toBeNull(); // volumeLots 0
   });
+  it("revenueYoy Map 命中的列填值,未命中的列為 null", () => {
+    const out = buildFactorRows(snap, [], [], new Map([["2330", 30.1]]));
+    const tsmc = out.rows.find((r) => r.symbol === "2330")!;
+    const cement = out.rows.find((r) => r.symbol === "1101")!;
+    expect(tsmc.revenueYoyPct).toBe(30.1);
+    expect(cement.revenueYoyPct).toBeNull();
+  });
 });
 
 describe("getStrategySnapshot", () => {
-  it("月均/T86 源失敗 → 對應欄全 null 仍回快照(區塊容錯)", async () => {
+  it("月均/T86/營收源失敗 → 對應欄全 null 仍回快照(區塊容錯)", async () => {
     const out = await getStrategySnapshot({
       screener: async () => snap,
       dayAvg: async () => { throw new Error("avg down"); },
       t86: async () => { throw new Error("t86 down"); },
+      revenueYoy: async () => { throw new Error("revenue down"); },
     });
     expect(out.rows).toHaveLength(2);
-    expect(out.rows.every((r) => r.biasPct === null && r.chipsRatio === null)).toBe(true);
+    expect(out.rows.every((r) => r.biasPct === null && r.chipsRatio === null && r.revenueYoyPct === null)).toBe(true);
   });
   it("價量(screener)源失敗 → throw", async () => {
     await expect(
-      getStrategySnapshot({ screener: async () => { throw new Error("down"); }, dayAvg: async () => [], t86: async () => [] }),
+      getStrategySnapshot({ screener: async () => { throw new Error("down"); }, dayAvg: async () => [], t86: async () => [], revenueYoy: async () => new Map() }),
     ).rejects.toThrow("down");
   });
 });

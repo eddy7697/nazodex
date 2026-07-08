@@ -6,6 +6,7 @@ export function makeRow(over: Partial<FactorRow>): FactorRow {
   return {
     symbol: "0000", name: "測試", close: 100, changePct: 0, volumeLots: 1000,
     peRatio: 15, dividendYield: 4, pbRatio: 1.5, biasPct: 0, chipsRatio: 0,
+    revenueYoyPct: null,
     ...over,
   };
 }
@@ -57,29 +58,44 @@ describe("computeFactorScores", () => {
     expect(etf.dividend).toBeNull();
     expect(etf.momentum).toBe(100); // 只剩 changePct,2 > 1
   });
+  // growth 因子:營收 YoY 截面百分位
+  it("growth 因子按 revenueYoyPct 百分位計分,缺值為 null", () => {
+    const rows = [
+      makeRow({ symbol: "A", revenueYoyPct: 50 }),
+      makeRow({ symbol: "B", revenueYoyPct: -10 }),
+      makeRow({ symbol: "C", revenueYoyPct: null }),
+    ];
+    const scores = computeFactorScores(rows);
+    expect(scores[0].growth).toBe(100);
+    expect(scores[1].growth).toBe(0);
+    expect(scores[2].growth).toBeNull();
+  });
 });
 
-const W: Weights = { value: 0.2, dividend: 0.2, momentum: 0.2, chips: 0.2, heat: 0.2 };
+// growth 權重刻意設 0(< 其餘五力的 0.2):避免與其餘五力並列「主因子」——
+// 既有 recommend fixture 未設 revenueYoyPct(預設 null),若 growth 也並列主因子會讓每列都因
+// growth 缺值被剔除,與本檔測試「五力平均」的原意無關,故排除在 tie 之外。
+const W: Weights = { value: 0.2, dividend: 0.2, momentum: 0.2, chips: 0.2, heat: 0.2, growth: 0 };
 
 describe("compositeScore", () => {
   it("加權平均", () => {
-    const f: FactorScores = { value: 100, dividend: 50, momentum: 0, chips: 50, heat: 50 };
+    const f: FactorScores = { value: 100, dividend: 50, momentum: 0, chips: 50, heat: 50, growth: null };
     expect(compositeScore(f, W)).toBe(50);
   });
   it("缺因子 → 權重再正規化(不拖分)", () => {
-    const f: FactorScores = { value: null, dividend: null, momentum: 80, chips: 80, heat: 80 };
+    const f: FactorScores = { value: null, dividend: null, momentum: 80, chips: 80, heat: 80, growth: null };
     expect(compositeScore(f, W)).toBe(80);
   });
   it("非 null 因子 < 3 → null(不進榜)", () => {
-    const f: FactorScores = { value: null, dividend: null, momentum: null, chips: 90, heat: 90 };
+    const f: FactorScores = { value: null, dividend: null, momentum: null, chips: 90, heat: 90, growth: null };
     expect(compositeScore(f, W)).toBeNull();
   });
 });
 
 describe("STRATEGIES", () => {
-  it("5 檔策略,權重和皆為 1", () => {
-    expect(STRATEGIES).toHaveLength(5);
-    expect(STRATEGIES.map((s) => s.key)).toEqual(["balanced", "income", "value", "momentum", "chips"]);
+  it("6 檔策略,權重和皆為 1", () => {
+    expect(STRATEGIES).toHaveLength(6);
+    expect(STRATEGIES.map((s) => s.key)).toEqual(["balanced", "income", "value", "momentum", "chips", "growth"]);
     for (const s of STRATEGIES) {
       const sum = Object.values(s.weights).reduce((a, b) => a + b, 0);
       expect(sum).toBeCloseTo(1, 9);
@@ -89,14 +105,14 @@ describe("STRATEGIES", () => {
 
 describe("buildReasons", () => {
   it("取分數最高兩因子,>=90 用「前 X%」、其餘用「贏過 X%」", () => {
-    const f: FactorScores = { value: 20, dividend: 95, momentum: 60, chips: 30, heat: 10 };
+    const f: FactorScores = { value: 20, dividend: 95, momentum: 60, chips: 30, heat: 10, growth: null };
     const reasons = buildReasons(f, makeRow({ biasPct: null }));
     expect(reasons).toHaveLength(2);
     expect(reasons[0]).toBe("殖利率前 5%");
     expect(reasons[1]).toBe("價格動能贏過 60% 的股票");
   });
   it("動能站上月均線時帶乖離數字", () => {
-    const f: FactorScores = { value: null, dividend: null, momentum: 92, chips: 10, heat: 20 };
+    const f: FactorScores = { value: null, dividend: null, momentum: 92, chips: 10, heat: 20, growth: null };
     const reasons = buildReasons(f, makeRow({ biasPct: 4.2 }));
     expect(reasons[0]).toBe("站上月均線 +4.2%,動能前 8%");
   });
@@ -117,7 +133,7 @@ describe("recommend", () => {
     expect(recs.some((r) => r.row.symbol === "TINY")).toBe(false);
   });
   it("策略主因子(最高權重,並列取全部)缺值者不進榜", () => {
-    const income: Weights = { value: 0.25, dividend: 0.45, momentum: 0.05, chips: 0.15, heat: 0.1 };
+    const income: Weights = { value: 0.25, dividend: 0.45, momentum: 0.05, chips: 0.15, heat: 0.1, growth: 0 };
     const rows = [
       // 四因子皆頂尖但無殖利率資料 → 不得進存股收息榜
       makeRow({ symbol: "NOYIELD", dividendYield: null, peRatio: 8, pbRatio: 0.8, biasPct: 6, changePct: 4, chipsRatio: 3, volumeLots: 9000 }),
