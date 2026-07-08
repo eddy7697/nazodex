@@ -47,6 +47,11 @@ RUN pnpm exec esbuild scripts/ingest-fundamentals.ts \
       --bundle --platform=node --format=esm --target=node22 \
       --packages=external \
       --outfile=dist/ingest-fundamentals.mjs
+# 除權息行事曆(持股∪自選)ingest;CronJob 每週一 17:00 台北跑 dist/ingest-dividends.mjs
+RUN pnpm exec esbuild scripts/ingest-dividends.ts \
+      --bundle --platform=node --format=esm --target=node22 \
+      --packages=external \
+      --outfile=dist/ingest-dividends.mjs
 # Strip devDependencies (tsx, typescript, vitest, esbuild, prisma CLI, ...)
 # now that build artifacts (.next/standalone, dist/ingest-daily.mjs) exist.
 # pnpm keeps @prisma/client's generated engine/client inside its content

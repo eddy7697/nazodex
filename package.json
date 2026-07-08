@@ -13,6 +13,7 @@
     "backfill:history": "tsx scripts/backfill-history.ts",
     "backfill:finmind": "tsx scripts/backfill-finmind.ts",
     "ingest:fundamentals": "tsx scripts/ingest-fundamentals.ts",
+    "ingest:dividends": "tsx scripts/ingest-dividends.ts",
     "assets:prepare": "node scripts/prepare-assets.mjs"
   },
   "keywords": [],
