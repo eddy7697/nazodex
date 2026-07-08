@@ -1,4 +1,4 @@
-// 把 public/taidex_assets/ 原始 PNG 處理成正式素材:
+// 把 public/nazodex_assets/ 原始 PNG 處理成正式素材:
 // 亮度轉 alpha(透明底,可浮在任何深色上)+ 邊緣淡出 + 分類輸出 WebP。
 // 用法:pnpm assets:prepare
 import { mkdir } from "node:fs/promises";
@@ -7,7 +7,7 @@ import sharp from "sharp";
 import { lumaToAlpha, edgeFade } from "./asset-pipeline.lib.mjs";
 
 const ROOT = path.resolve(import.meta.dirname, "..");
-const SRC = path.join(ROOT, "public/taidex_assets");
+const SRC = path.join(ROOT, "public/nazodex_assets");
 
 // crop: 1024x1536 直式空狀態圖取上方 1024x1024 內容區(下方留白給 UI 文案,不要)
 const STATUS_CROP = { left: 0, top: 128, width: 1024, height: 1024 };

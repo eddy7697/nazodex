@@ -7,4 +7,5 @@ dist/
 .superpowers/
 *.tsbuildinfo
 next-env.d.ts
-public/taidex_assets/
+public/nazodex_assets/
+.playwright-mcp/

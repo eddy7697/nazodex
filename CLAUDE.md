@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-Taidex（對外網域 **tradex.nazo.com.tw**）——給投資新手（擁有者 Vincent 與太太）的台股看板 / 自選股工具。
+NazoDex（對外網域 **nazodex.nazo.com.tw**）——給投資新手（擁有者 Vincent 與太太）的台股看板 / 自選股工具。
 設計哲學:**使用門檻低、操作上限高**（對使用者是乾淨的看盤網站,深度資訊漸進式揭露）。
 
 ## 指令
@@ -13,7 +13,7 @@ pnpm exec tsc --noEmit
 pnpm exec prisma migrate dev --name <desc>   # 新增 schema 變更時產生 migration
 pnpm ingest:daily   # 手動跑每日行情灌入（需可連 DB）
 pnpm backfill:history  # 回填自選∪持股近 N 月日線(--months=N,預設 2;需可連 DB)
-pnpm assets:prepare    # 設計素材管線:public/taidex_assets/ 原始 PNG(gitignored)→ 透明化 WebP + app icon
+pnpm assets:prepare    # 設計素材管線:public/nazodex_assets/ 原始 PNG(gitignored)→ 透明化 WebP + app icon
 ```
 
 - 套件管理用 **pnpm**（corepack, v11）。Node 22。TypeScript strict。
@@ -63,19 +63,19 @@ pnpm assets:prepare    # 設計素材管線:public/taidex_assets/ 原始 PNG(git
 
 ## 部署（無 CI，本機滾動更新）
 
-- 以 `tradex` 租戶跑在 `~/devsecops-nazo` 的 GKE 平台（project `frozenheart`,cluster `ecommerce-cluster`）。
-- 更新流程:改完 code →（在 `~/devsecops-nazo`）跑 `bash kubernetes/tenants/tradex/build-init.sh`（首次）或 `build-update.sh`（日常）→ 內含 build+push image + `make deploy tradex`。
-- LINE Login channel `1654117392`,LIFF 入口 `/liff`（`LIFF_ID` 由 configmap runtime 讀取,入口網址 `https://liff.line.me/1654117392-BKWVcPBa`）。callback:`https://tradex.nazo.com.tw/api/auth/callback/line`。
-- 對外 TLS 由 Cloudflare（Flexible SSL）處理,origin 走 HTTP;故 NextAuth 用 `AUTH_URL=https://tradex.nazo.com.tw` + `AUTH_TRUST_HOST=true`。
+- 以 `nazodex` 租戶跑在 `~/devsecops-nazo` 的 GKE 平台（project `frozenheart`,cluster `ecommerce-cluster`）。
+- 更新流程:改完 code →（在 `~/devsecops-nazo`）跑 `bash kubernetes/tenants/nazodex/build-init.sh`（首次）或 `build-update.sh`（日常）→ 內含 build+push image + `make deploy nazodex`。
+- LINE Login channel `1654117392`,LIFF 入口 `/liff`（`LIFF_ID` 由 configmap runtime 讀取,入口網址 `https://liff.line.me/1654117392-BKWVcPBa`）。callback:`https://nazodex.nazo.com.tw/api/auth/callback/line`。
+- 對外 TLS 由 Cloudflare（Flexible SSL）處理,origin 走 HTTP;故 NextAuth 用 `AUTH_URL=https://nazodex.nazo.com.tw` + `AUTH_TRUST_HOST=true`。
 
 ## 規格 / 計畫文件
 
-- 看盤/自選股:`docs/superpowers/specs/2026-07-02-taidex-watchlist-design.md` + `docs/superpowers/plans/2026-07-02-taidex-watchlist.md`
-- 持股損益:`docs/superpowers/specs/2026-07-03-taidex-holdings-design.md` + `docs/superpowers/plans/2026-07-03-taidex-holdings.md`;股利/除權息:`docs/superpowers/specs/2026-07-03-taidex-dividends-design.md` + `docs/superpowers/plans/2026-07-03-taidex-dividends.md`
-- 大盤總覽:`docs/superpowers/specs/2026-07-03-taidex-market-overview-design.md`
-- 條件選股:`docs/superpowers/specs/2026-07-03-taidex-screener-design.md` + `docs/superpowers/plans/2026-07-03-taidex-screener.md`
-- 設計語言:`docs/superpowers/specs/2026-07-05-taidex-design-language.md`（含 AI 生圖提示詞）+ `docs/superpowers/plans/2026-07-05-taidex-design-language.md`
-- 新聞/事件方向:`docs/superpowers/specs/2026-07-05-taidex-news-events-direction.md`（方向討論記錄,含波動四層模型、M1–M4 milestone、YAGNI 界線;非實作規格）
+- 看盤/自選股:`docs/superpowers/specs/2026-07-02-nazodex-watchlist-design.md` + `docs/superpowers/plans/2026-07-02-nazodex-watchlist.md`
+- 持股損益:`docs/superpowers/specs/2026-07-03-nazodex-holdings-design.md` + `docs/superpowers/plans/2026-07-03-nazodex-holdings.md`;股利/除權息:`docs/superpowers/specs/2026-07-03-nazodex-dividends-design.md` + `docs/superpowers/plans/2026-07-03-nazodex-dividends.md`
+- 大盤總覽:`docs/superpowers/specs/2026-07-03-nazodex-market-overview-design.md`
+- 條件選股:`docs/superpowers/specs/2026-07-03-nazodex-screener-design.md` + `docs/superpowers/plans/2026-07-03-nazodex-screener.md`
+- 設計語言:`docs/superpowers/specs/2026-07-05-nazodex-design-language.md`（含 AI 生圖提示詞）+ `docs/superpowers/plans/2026-07-05-nazodex-design-language.md`
+- 新聞/事件方向:`docs/superpowers/specs/2026-07-05-nazodex-news-events-direction.md`（方向討論記錄,含波動四層模型、M1–M4 milestone、YAGNI 界線;非實作規格）
 
 ## 路線圖
 

@@ -1257,5 +1257,5 @@ export default function AddTransaction({ onAdded }: { onAdded: () => void }) {
 - [ ] **Step 1:** 全量驗證:`pnpm test -- --run` && `pnpm exec tsc --noEmit` && `pnpm build`
 - [ ] **Step 2:** 更新 CLAUDE.md 路線圖與架構段落
 - [ ] **Step 3:** Commit `git commit -m "docs: 路線圖更新(持股損益完成)"`
-- [ ] **Step 4:** 部署:在 `~/devsecops-nazo` 跑 `bash kubernetes/tenants/tradex/build-update.sh`（initContainer 會自動 `prisma migrate deploy` 0003）
-- [ ] **Step 5:** 線上驗證 `https://tradex.nazo.com.tw/holdings`
+- [ ] **Step 4:** 部署:在 `~/devsecops-nazo` 跑 `bash kubernetes/tenants/nazodex/build-update.sh`（initContainer 會自動 `prisma migrate deploy` 0003）
+- [ ] **Step 5:** 線上驗證 `https://nazodex.nazo.com.tw/holdings`

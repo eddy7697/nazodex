@@ -822,7 +822,7 @@ git commit -m "feat: /screener 條件選股頁(preset 策略+條件面板+前端
 
 **Files:**
 - Modify: `CLAUDE.md`(架構節新增 screener 模組、路線圖更新)
-- Modify: `docs/superpowers/specs/2026-07-03-taidex-screener-design.md`(若實作有偏離,回寫)
+- Modify: `docs/superpowers/specs/2026-07-03-nazodex-screener-design.md`(若實作有偏離,回寫)
 
 - [ ] **Step 1: 本機 E2E**:`pnpm dev` + 依 memory「local-e2e-auth-bypass」偽造 authjs JWT cookie,curl `/api/screener` 確認 200 與 JSON 形狀;瀏覽器(或 headless)開 `/screener` 確認 preset 切換與條件調整會即時改變結果數。
 - [ ] **Step 2: CLAUDE.md**:架構清單加一行 `**條件選股** lib/screener/…`(比照 market-overview 行文);路線圖將「條件選股」移入已上線,後續清單遞補;測試數字更新。

@@ -1,4 +1,4 @@
-# Taidex 台股看板(看盤 / 自選股)Implementation Plan
+# NazoDex 台股看板(看盤 / 自選股)Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
@@ -37,7 +37,7 @@
 - [ ] **Step 1: 建立專案與安裝依賴**
 
 ```bash
-cd /home/eddy/taidex
+cd /home/eddy/nazodex
 pnpm init
 pnpm add next@latest react react-dom
 pnpm add -D typescript @types/react @types/node @types/react-dom \
@@ -139,7 +139,7 @@ html, body { background: var(--bg); color: #e6edf3; }
 ```tsx
 import "./globals.css";
 import type { Metadata } from "next";
-export const metadata: Metadata = { title: "Taidex 台股看板", description: "台股自選股看盤" };
+export const metadata: Metadata = { title: "NazoDex 台股看板", description: "台股自選股看盤" };
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="zh-Hant">
@@ -152,7 +152,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 `app/page.tsx`:
 ```tsx
 export default function Home() {
-  return <main className="p-4">Taidex</main>;
+  return <main className="p-4">NazoDex</main>;
 }
 ```
 
@@ -173,7 +173,7 @@ describe("smoke", () => {
 
 `.env.example`:
 ```bash
-DATABASE_URL="mysql://user:pass@host:3306/taidex"
+DATABASE_URL="mysql://user:pass@host:3306/nazodex"
 AUTH_SECRET=""
 AUTH_LINE_ID=""
 AUTH_LINE_SECRET=""
@@ -1000,7 +1000,7 @@ import SignInButton from "@/components/SignInButton";
 export default function LoginPage() {
   return (
     <main className="flex min-h-screen flex-col items-center justify-center gap-6 p-4">
-      <h1 className="text-2xl font-bold">Taidex 台股看板</h1>
+      <h1 className="text-2xl font-bold">NazoDex 台股看板</h1>
       <p className="text-gray-400">用 LINE 登入,開始追蹤你的自選股</p>
       <SignInButton />
     </main>
@@ -1013,7 +1013,7 @@ export default function LoginPage() {
 import "./globals.css";
 import type { Metadata } from "next";
 import Providers from "@/components/Providers";
-export const metadata: Metadata = { title: "Taidex 台股看板", description: "台股自選股看盤" };
+export const metadata: Metadata = { title: "NazoDex 台股看板", description: "台股自選股看盤" };
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="zh-Hant">
@@ -2126,22 +2126,22 @@ docs
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: taidex-web
+  name: nazodex-web
 spec:
   replicas: 1
   selector:
-    matchLabels: { app: taidex-web }
+    matchLabels: { app: nazodex-web }
   template:
     metadata:
-      labels: { app: taidex-web }
+      labels: { app: nazodex-web }
     spec:
       containers:
         - name: web
-          image: REGISTRY/taidex:latest   # 替換為你的 image
+          image: REGISTRY/nazodex:latest   # 替換為你的 image
           ports:
             - containerPort: 3000
           envFrom:
-            - secretRef: { name: taidex-secrets }
+            - secretRef: { name: nazodex-secrets }
           readinessProbe:
             httpGet: { path: /login, port: 3000 }
             initialDelaySeconds: 10
@@ -2150,9 +2150,9 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: taidex-web
+  name: nazodex-web
 spec:
-  selector: { app: taidex-web }
+  selector: { app: nazodex-web }
   ports:
     - port: 80
       targetPort: 3000
@@ -2165,7 +2165,7 @@ spec:
 apiVersion: batch/v1
 kind: CronJob
 metadata:
-  name: taidex-ingest-daily
+  name: nazodex-ingest-daily
 spec:
   schedule: "0 7 * * 1-5"   # UTC 07:00 週一到五 = 台北 15:00
   concurrencyPolicy: Forbid
@@ -2176,10 +2176,10 @@ spec:
           restartPolicy: Never
           containers:
             - name: ingest
-              image: REGISTRY/taidex:latest
+              image: REGISTRY/nazodex:latest
               command: ["node", "node_modules/.bin/tsx", "scripts/ingest-daily.ts"]
               envFrom:
-                - secretRef: { name: taidex-secrets }
+                - secretRef: { name: nazodex-secrets }
 ```
 
 > 註:若 runner image 未含 devDependencies(tsx),CronJob 改用預先編譯的 JS,或在 builder 階段 `pnpm build` 時一併把 `scripts/ingest-daily.ts` 編成 `dist/ingest-daily.js` 並以 `node dist/ingest-daily.js` 執行。實作時擇一,並在 `docs/DEPLOY.md` 記錄所選方式。
@@ -2191,10 +2191,10 @@ spec:
 apiVersion: v1
 kind: Secret
 metadata:
-  name: taidex-secrets
+  name: nazodex-secrets
 type: Opaque
 stringData:
-  DATABASE_URL: "mysql://user:pass@CLOUD_SQL_HOST:3306/taidex"
+  DATABASE_URL: "mysql://user:pass@CLOUD_SQL_HOST:3306/nazodex"
   AUTH_SECRET: "REPLACE"
   AUTH_LINE_ID: "REPLACE"
   AUTH_LINE_SECRET: "REPLACE"
@@ -2210,16 +2210,16 @@ stringData:
 2. 產生 AUTH_SECRET:`npx auth secret`
 3. 建立 secret:`kubectl apply -f k8s/secret.example.yaml`(先填好值)
 4. 遷移 DB:一次性 Job 或本機連線執行 `pnpm exec prisma migrate deploy`
-5. Build & push:`docker build -t REGISTRY/taidex:latest . && docker push REGISTRY/taidex:latest`
+5. Build & push:`docker build -t REGISTRY/nazodex:latest . && docker push REGISTRY/nazodex:latest`
 6. 部署:`kubectl apply -f k8s/deployment.yaml -f k8s/cronjob.yaml`
-7. 首次灌資料:手動觸發一次 `kubectl create job --from=cronjob/taidex-ingest-daily first-run`
-8. 對外:用你叢集既有的 Ingress / LoadBalancer 指向 taidex-web Service,綁網域與憑證
+7. 首次灌資料:手動觸發一次 `kubectl create job --from=cronjob/nazodex-ingest-daily first-run`
+8. 對外:用你叢集既有的 Ingress / LoadBalancer 指向 nazodex-web Service,綁網域與憑證
 9. Cloud SQL 連線:用 Cloud SQL Auth Proxy sidecar 或私有 IP(擇一,於 deployment 補上)
 ```
 
 - [ ] **Step 5: 驗證 build**
 
-Run: `docker build -t taidex:test .`
+Run: `docker build -t nazodex:test .`
 Expected: build 成功(需本機有 Docker）。若無 Docker,略過此步並在文件註記。
 
 - [ ] **Step 6: Commit**

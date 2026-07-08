@@ -14,7 +14,7 @@
 - 金額顯示用 `lib/format.ts`（`fmtPrice`/`fmtMoney`/`fmtSignedMoney`/`fmtSignedPct`）。
 - 每個 DB 查詢以 session userId 過濾。
 - TDD：先寫失敗測試。測試指令 `pnpm test`（vitest run）。
-- Spec：`docs/superpowers/specs/2026-07-03-taidex-dividends-design.md`。
+- Spec：`docs/superpowers/specs/2026-07-03-nazodex-dividends-design.md`。
 
 ---
 

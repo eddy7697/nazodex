@@ -1,7 +1,7 @@
 apiVersion: batch/v1
 kind: CronJob
 metadata:
-  name: taidex-ingest-daily
+  name: nazodex-ingest-daily
 spec:
   schedule: "0 7 * * 1-5"   # UTC 07:00 週一到五 = 台北 15:00
   concurrencyPolicy: Forbid
@@ -12,11 +12,11 @@ spec:
           restartPolicy: Never
           containers:
             - name: ingest
-              image: REGISTRY/taidex:latest
+              image: REGISTRY/nazodex:latest
               # scripts/ingest-daily.ts is compiled to plain JS at build time
               # (esbuild, see Dockerfile) into dist/ingest-daily.mjs, since the
               # runner image ships production dependencies only and does not
               # include tsx (a devDependency). See docs/DEPLOY.md.
               command: ["node", "dist/ingest-daily.mjs"]
               envFrom:
-                - secretRef: { name: taidex-secrets }
+                - secretRef: { name: nazodex-secrets }

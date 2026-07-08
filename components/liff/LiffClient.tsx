@@ -51,14 +51,14 @@ export default function LiffClient({ liffId }: { liffId: string | null }) {
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-center gap-4 p-6 text-center">
-      <h1 className="text-xl font-bold">Taidex 台股看板</h1>
+      <h1 className="text-xl font-bold">NazoDex 台股看板</h1>
       {liffState === "no-id" ? (
         <p className="max-w-sm text-sm text-gray-400">
           尚未設定 LIFF_ID。請在 LINE Developers 建立 LIFF app 後,把 LIFF ID 填入
           部署設定的 <code>LIFF_ID</code> 再重新部署。
         </p>
       ) : (
-        <p className="text-sm text-gray-400">正在進入 Taidex…</p>
+        <p className="text-sm text-gray-400">正在進入 NazoDex…</p>
       )}
     </main>
   );

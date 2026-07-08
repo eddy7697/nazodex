@@ -1,22 +1,22 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: taidex-web
+  name: nazodex-web
 spec:
   replicas: 1
   selector:
-    matchLabels: { app: taidex-web }
+    matchLabels: { app: nazodex-web }
   template:
     metadata:
-      labels: { app: taidex-web }
+      labels: { app: nazodex-web }
     spec:
       containers:
         - name: web
-          image: REGISTRY/taidex:latest   # 替換為你的 image
+          image: REGISTRY/nazodex:latest   # 替換為你的 image
           ports:
             - containerPort: 3000
           envFrom:
-            - secretRef: { name: taidex-secrets }
+            - secretRef: { name: nazodex-secrets }
           readinessProbe:
             httpGet: { path: /login, port: 3000 }
             initialDelaySeconds: 10
@@ -25,9 +25,9 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: taidex-web
+  name: nazodex-web
 spec:
-  selector: { app: taidex-web }
+  selector: { app: nazodex-web }
   ports:
     - port: 80
       targetPort: 3000
