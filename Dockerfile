@@ -42,6 +42,11 @@ RUN pnpm exec esbuild scripts/backfill-finmind.ts \
       --bundle --platform=node --format=esm --target=node22 \
       --packages=external \
       --outfile=dist/backfill-finmind.mjs
+# 基本面(月營收/季EPS)ingest;K8s CronJob 每月 11、16 日跑 `node dist/ingest-fundamentals.mjs`。
+RUN pnpm exec esbuild scripts/ingest-fundamentals.ts \
+      --bundle --platform=node --format=esm --target=node22 \
+      --packages=external \
+      --outfile=dist/ingest-fundamentals.mjs
 # Strip devDependencies (tsx, typescript, vitest, esbuild, prisma CLI, ...)
 # now that build artifacts (.next/standalone, dist/ingest-daily.mjs) exist.
 # pnpm keeps @prisma/client's generated engine/client inside its content
